@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29318.209
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentValidation.Blazor", "FluentValidation.Blazor\FluentValidation.Blazor.csproj", "{774DBB06-F9E7-495A-BE80-8BEE176B3194}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{774DBB06-F9E7-495A-BE80-8BEE176B3194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{774DBB06-F9E7-495A-BE80-8BEE176B3194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{774DBB06-F9E7-495A-BE80-8BEE176B3194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{774DBB06-F9E7-495A-BE80-8BEE176B3194}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {37C6B3C2-AA21-4F10-A1A6-DF51764FA32B}
+	EndGlobalSection
+EndGlobal
