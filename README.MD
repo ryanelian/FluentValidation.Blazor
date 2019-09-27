@@ -4,11 +4,20 @@
 
 [![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master)
 
+```
+dotnet add package FluentValidation
+dotnet add package Accelist.FluentValidation.Blazor
+```
+
 This is a direct replacement for `<DataAnnotationValidator>` with no additional configuration required for the application code base:
 
 ```html
 <EditForm Model="Form">
+
+
     <FluentValidation.FluentValidator></FluentValidation.FluentValidator>
+
+
     <div class="form-group">
         <label for="name">Name</label>
         <InputText id="name" class="form-control" @bind-Value="Form.Name"></InputText>
@@ -43,9 +52,9 @@ This is a direct replacement for `<DataAnnotationValidator>` with no additional 
 </EditForm>
 ```
 
-This component automatically detect the `Model` data type used by the parent `EditForm` and attempts to acquire the `IValidator<T>` for the model data type.
+This component automatically detect the `Model` data type used by the parent `EditForm` and attempts to acquire the `FluentValidation.IValidator<T>` for the model data type.
 
-For this reason, [in addition to writing the usual `AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), you are required to register the `IValidator<T>` implementation in the Dependency Injection Service Provider:
+For this reason, [in addition to writing the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), you are required to register the `FluentValidation.IValidator<T>` implementation in the Dependency Injection Service Provider:
 
 ```cs
 services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModelValidator>();

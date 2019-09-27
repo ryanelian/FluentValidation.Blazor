@@ -8,9 +8,9 @@
 
 This is a direct replacement for &lt;DataAnnotationValidator&gt; with no additional configuration required for the application code base.
 
-This component automatically detect the Model data type used by the parent EditForm and attempts to acquire the IValidator&lt;T&gt; for the model data type.
+This component automatically detect the Model data type used by the parent EditForm and attempts to acquire the FluentValidation.IValidator&lt;T&gt; for the model data type.
 
-For this reason, in addition to writing the usual AbstractValidator&lt;T&gt; Fluent Validation implementation, you are required to register the IValidator&lt;T&gt; implementation in the Dependency Injection Service Provider.
+For this reason, in addition to writing the usual FluentValidation.AbstractValidator&lt;T&gt; Fluent Validation implementation (https://fluentvalidation.net/start), you are required to register the FluentValidation.IValidator&lt;T&gt; implementation in the Dependency Injection Service Provider.
 
 This allows you, dear programmer, to inject required services to your validation implementation for writing amazing custom validation methods!</Description>
     <Copyright>2019</Copyright>
@@ -19,7 +19,7 @@ This allows you, dear programmer, to inject required services to your validation
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta.1</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
 
