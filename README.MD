@@ -4,10 +4,14 @@
 
 [![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master)
 
+## Install
+
 ```
 dotnet add package FluentValidation
 dotnet add package Accelist.FluentValidation.Blazor
 ```
+
+## Usage
 
 This is a direct replacement for `<DataAnnotationValidator>` with no additional configuration required for the application code base:
 
