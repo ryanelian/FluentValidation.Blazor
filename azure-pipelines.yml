@@ -34,12 +34,15 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
-  displayName: 'nuget push'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'off'
+
+- task: NuGetCommand@2
   inputs:
     command: 'push'
-    feedsToUse: 'select'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: 'test'
-    versioningScheme: 'off'
+    publishVstsFeed: 'e48e1156-bc00-4459-a15d-e8aac1c98eaa/fc2537b4-7482-4b4a-a6e1-46dab8061c18'
     allowPackageConflicts: true
