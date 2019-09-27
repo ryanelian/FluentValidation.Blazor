@@ -1,6 +1,8 @@
 # FluentValidation.Blazor
 
-> Fluent Validator component for Blazor EditForm. 
+> Fluent Validator component for Blazor EditForm :white_check_mark: :arrows_clockwise:
+
+[![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master)
 
 This is a direct replacement for `<DataAnnotationValidator>` with no additional configuration required for the application code base:
 
@@ -48,3 +50,13 @@ For this reason, [in addition to writing the usual `AbstractValidator<T> Fluent 
 ```cs
 services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModelValidator>();
 ```
+
+**This allows you, dear programmer, to inject required services to your validation implementation for writing amazing custom validation methods!**
+
+## Asynchronous Warning
+
+Due to buggy UI when using `async void` on `CurrentEditContext.OnValidationRequested` and `CurrentEditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), the validator is run synchronously.
+
+**This should not stop you from writing asynchronous validation methods because Fluent Validator will force run asynchronous method synchronously when called synchronously.**
+
+*Just something to keep in mind when coding!*
