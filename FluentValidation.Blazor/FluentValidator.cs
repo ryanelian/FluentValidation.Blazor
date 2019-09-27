@@ -11,14 +11,26 @@ namespace FluentValidation
     /// </summary>
     public class FluentValidator : ComponentBase
     {
+        /// <summary>
+        /// Inherited object from the FormEdit component.
+        /// </summary>
         [CascadingParameter]
         EditContext CurrentEditContext { get; set; }
 
+        /// <summary>
+        /// Enable access to the ASP.NET Core Service Provider / DI.
+        /// </summary>
         [Inject]
         IServiceProvider ServiceProvider { get; set; }
 
+        /// <summary>
+        /// The AbstractValidator written by the application developer registered in the DI.
+        /// </summary>
         IValidator Validator { set; get; }
 
+        /// <summary>
+        /// Attach to parent EditForm context enabling validation.
+        /// </summary>
         protected override void OnInitialized()
         {
             if (CurrentEditContext == null)
@@ -32,11 +44,15 @@ namespace FluentValidation
             this.AddValidation();
         }
 
+        /// <summary>
+        /// Try acquiring the form validator implementation from the DI.
+        /// </summary>
         private void GetValidator()
         {
             var validatorType = typeof(IValidator<>);
             var formType = CurrentEditContext.Model.GetType();
             var formValidatorType = validatorType.MakeGenericType(formType);
+
             this.Validator = ServiceProvider.GetService(formValidatorType) as IValidator;
 
             if (this.Validator == null)
@@ -46,6 +62,9 @@ namespace FluentValidation
             }
         }
 
+        /// <summary>
+        /// Add form validation logic handlers.
+        /// </summary>
         private void AddValidation()
         {
             var messages = new ValidationMessageStore(CurrentEditContext);
@@ -59,6 +78,11 @@ namespace FluentValidation
                 (sender, eventArgs) => ValidateField(CurrentEditContext, messages, eventArgs.FieldIdentifier);
         }
 
+        /// <summary>
+        /// Validate the whole form and trigger client UI update.
+        /// </summary>
+        /// <param name="editContext"></param>
+        /// <param name="messages"></param>
         private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
             // ATTENTION: DO NOT USE Async Void + ValidateAsync
@@ -76,6 +100,12 @@ namespace FluentValidation
             editContext.NotifyValidationStateChanged();
         }
 
+        /// <summary>
+        /// Validate a single field and trigger client UI update.
+        /// </summary>
+        /// <param name="editContext"></param>
+        /// <param name="messages"></param>
+        /// <param name="fieldIdentifier"></param>
         private void ValidateField(EditContext editContext, ValidationMessageStore messages, /*in*/ FieldIdentifier fieldIdentifier)
         {
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
