@@ -19,7 +19,7 @@ This allows you, dear programmer, to inject required services to your validation
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1-beta.1</Version>
+    <Version>1.1.0-beta.1</Version>
   </PropertyGroup>
 
 
