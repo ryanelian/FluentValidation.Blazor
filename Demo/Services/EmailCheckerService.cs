@@ -9,6 +9,7 @@ namespace Demo.Services
     {
         public async Task<bool> IsAvailableAsync(string email)
         {
+            // simulate delay accessing remote services
             await Task.Delay(1000);
 
             if (email == "ryan.elian@accelist.com")
