@@ -106,7 +106,7 @@ namespace FluentValidation
         /// <param name="editContext"></param>
         /// <param name="messages"></param>
         /// <param name="fieldIdentifier"></param>
-        private void ValidateField(EditContext editContext, ValidationMessageStore messages, /*in*/ FieldIdentifier fieldIdentifier)
+        private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
         {
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
             var vctx = new ValidationContext(editContext.Model, new FluentValidation.Internal.PropertyChain(), vselector);
