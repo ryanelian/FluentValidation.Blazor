@@ -1,6 +1,6 @@
 # FluentValidation.Blazor
 
-> Fluent Validator component for Blazor EditForm :cyclone: :white_check_mark:
+> Fluent Validation-powered Blazor component for validating standard EditForm :cyclone: :white_check_mark:
 
 [![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master) [![NuGet](https://badgen.net/nuget/v/Accelist.FluentValidation.Blazor?icon=nuget)](https://www.nuget.org/packages/Accelist.FluentValidation.Blazor) 
 
@@ -13,7 +13,7 @@ dotnet add package Accelist.FluentValidation.Blazor
 
 ## Usage
 
-This is a direct replacement for `<DataAnnotationValidator>` with no additional configuration required for the application code base:
+This library is a direct replacement to [the default Blazor `<DataAnnotationValidator>`](https://docs.microsoft.com/en-us/aspnet/core/blazor/forms-validation?view=aspnetcore-3.0) with **zero configuration required** :zap: in the application code base:
 
 ```html
 <EditForm Model="Form">
@@ -56,28 +56,29 @@ This is a direct replacement for `<DataAnnotationValidator>` with no additional 
 </EditForm>
 ```
 
-This component automatically detect the `Model` data type used by the parent `EditForm` and attempts to acquire the `FluentValidation.IValidator<T>` for the model data type.
+The `<FluentValidation.FluentValidator>` component automatically detects the `Model` data type used by the parent `<EditForm>` then attempts to acquire the corresponding `FluentValidation.IValidator<T>` for that model data type.
 
-For this reason, [in addition to writing the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), you are required to register the `FluentValidation.IValidator<T>` implementation in the Dependency Injection Service Provider:
+For this reason, [in addition to coding the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), **you are required to register the `FluentValidation.IValidator<T>` implementation in the Service Provider (Dependency Injection)**:
 
 ```cs
 services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModelValidator>();
 ```
 
-**This allows you, dear programmer, to inject required services to your validation implementation for writing amazing custom validation methods!**
+**This effectively allows you, dear programmer, to inject required services to your validation implementations for writing amazing custom validation methods!** :fire:
 
 ## Inline Usage
 
-You may also pass `Validator` parameter directly to the component to inline the `AbstractValidator` implementation instead of relying on Dependency Injection mechanism:
+ `Validator` parameter may also be passed directly to the component to inline the `AbstractValidator` implementation instead of relying on DI mechanism:
 
 ```html
 <FluentValidator Validator="FormValidator"></FluentValidator>
 ```
 
 ```cs
-@using FluentValidation;
+@using FluentValidation
 @code {
-    class FormModelValidator : AbstractValidator<FormModel> {
+    class FormModelValidator : AbstractValidator<FormModel> 
+    {
         public MyValidator()
         {
             RuleFor(Q => Q.Name).NotEmpty().MaximumLength(255);
@@ -90,20 +91,28 @@ You may also pass `Validator` parameter directly to the component to inline the 
 
 ## Asynchronous Warning
 
-Due to buggy UI when using `async void` on `CurrentEditContext.OnValidationRequested` and `CurrentEditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), the validator is run synchronously.
+Due to buggy UI when using `async void` on `EditContext.OnValidationRequested` and `EditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), **the validator is run synchronously**.
 
-**This should not stop you from writing asynchronous validation methods because Fluent Validator will force run asynchronous method synchronously when called synchronously.**
+**This should not stop you from writing async validation methods because Fluent Validation will force run async methods synchronously.**
 
 *Just something to keep in mind when coding!*
 
 ## Repeated Remote Call Warning :warning:
 
-**By default, Fluent Validation does not short circuit the validation chain on first error.**
+**By default, Fluent Validation does NOT short-circuit the validation chain on first error.**
 
-This may cause problem when a validation hits the database / remote service multiple times in short burst due to validation triggers on field change!
+This may cause performance issues when a validation logic hits the database / remote service multiple times in short burst due to validation triggers on field change!
 
 To reduce the impact of repeated custom validation calls, use:
 
 - `.Cascade(CascadeMode.StopOnFirstFailure)` after `RuleFor()` chain,
 
 - Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
+
+## Why Not Just Use `<DataAnnotationValidator>`?
+
+1. `<DataAnnotationValidator>` cannot use DI services at the moment...
+
+2. ... but [`<DataAnnotationValidator>` also cannot do `AddModelError()`](https://github.com/aspnet/AspNetCore/issues/14524) like Razor Pages. Which rules out validation AFTER form submission!
+
+3. `[ValidationAttribute]` top-level `IsValid()` method cannot be async!
