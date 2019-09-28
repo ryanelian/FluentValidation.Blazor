@@ -1,27 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
     <Authors>ryanelian</Authors>
-    <Description>Fluent Validator component for Blazor EditForm.
+    <Title>FluentValidation.Blazor</Title>
+    <Description>Fluent Validation-powered Blazor component for validating standard EditForm 🌀 ✅
 
-This is a direct replacement for &lt;DataAnnotationValidator&gt; with no additional configuration required for the application code base.
+This library is a direct replacement to the default Blazor &lt;DataAnnotationValidator&gt; with zero configuration required ⚡️ in the application code base!
 
-This component automatically detect the Model data type used by the parent EditForm and attempts to acquire the FluentValidation.IValidator&lt;T&gt; for the model data type.
+The &lt;FluentValidation.FluentValidator&gt; component automatically detects the Model data type used by the parent &lt;EditForm&gt; (https://docs.microsoft.com/en-us/aspnet/core/blazor/forms-validation?view=aspnetcore-3.0) then attempts to acquire the corresponding FluentValidation.IValidator&lt;T&gt; for that model data type.
 
-For this reason, in addition to writing the usual FluentValidation.AbstractValidator&lt;T&gt; Fluent Validation implementation (https://fluentvalidation.net/start), you are required to register the FluentValidation.IValidator&lt;T&gt; implementation in the Dependency Injection Service Provider.
+For this reason, in addition to coding the usual FluentValidation.AbstractValidator&lt;T&gt; Fluent Validation implementation (https://fluentvalidation.net/start), you are required to register the FluentValidation.IValidator&lt;T&gt; implementation in the Service Provider (Dependency Injection).
 
-This allows you, dear programmer, to inject required services to your validation implementation for writing amazing custom validation methods!</Description>
+This effectively allows you, dear programmer, to inject required services to your validation implementations for writing amazing custom validation methods! 🔥
+
+Validator parameter may also be passed directly to the component to inline the AbstractValidator implementation instead of relying on DI mechanism.
+</Description>
     <Copyright>2019</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ryanelian/FluentValidation.Blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.0-beta.1</Version>
+    <Version>1.1.0-beta.2</Version>
+    <PackageIcon>fluent-validation-icon.png</PackageIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="img/fluent-validation-icon.png" Pack="true" PackagePath="/"/>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.5.0" />
