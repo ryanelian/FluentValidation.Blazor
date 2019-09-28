@@ -1,0 +1,54 @@
+﻿@page "/"
+
+<h1>Form 1: Inline Validation</h1>
+
+<EditForm Model="Form1">
+    <FluentValidator Validator="Form1Validator"></FluentValidator>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Form1.Name"></InputText>
+        <ValidationMessage For="() => Form1.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
+<h2>Form 2: Dependency Injection Validation</h2>
+
+<EditForm Model="Form2">
+    <FluentValidator></FluentValidator>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="Form2.Email"></InputText>
+        <ValidationMessage For="() => Form2.Email"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
+@using FluentValidation;
+@code {
+    class FormModel1
+    {
+        public string Name { set; get; }
+    }
+
+    class FormModel1Validator : AbstractValidator<FormModel1>
+    {
+        public FormModel1Validator()
+        {
+            RuleFor(Q => Q.Name).NotEmpty().MinimumLength(2).MaximumLength(8);
+        }
+    }
+
+    FormModel1 Form1 = new FormModel1();
+    FormModel1Validator Form1Validator = new FormModel1Validator();
+
+    FormModel2 Form2 = new FormModel2();
+}
