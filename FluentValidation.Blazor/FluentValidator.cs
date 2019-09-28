@@ -24,9 +24,10 @@ namespace FluentValidation
         IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
-        /// The AbstractValidator written by the application developer registered in the DI.
+        /// The AbstractValidator object for the corresponding form Model object type.
         /// </summary>
-        IValidator Validator { set; get; }
+        [Parameter]
+        public IValidator Validator { set; get; }
 
         /// <summary>
         /// Attach to parent EditForm context enabling validation.
@@ -40,7 +41,11 @@ namespace FluentValidation
                     $"inside an EditForm.");
             }
 
-            this.GetValidator();
+            if (this.Validator == null)
+            {
+                this.GetValidator();
+            }
+            
             this.AddValidation();
         }
 

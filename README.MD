@@ -1,6 +1,6 @@
 # FluentValidation.Blazor
 
-> Fluent Validator component for Blazor EditForm :white_check_mark: :arrows_clockwise:
+> Fluent Validator component for Blazor EditForm :cyclone: :white_check_mark:
 
 [![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master) [![NuGet](https://badgen.net/nuget/v/Accelist.FluentValidation.Blazor?icon=nuget)](https://www.nuget.org/packages/Accelist.FluentValidation.Blazor) 
 
@@ -66,6 +66,28 @@ services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModel
 
 **This allows you, dear programmer, to inject required services to your validation implementation for writing amazing custom validation methods!**
 
+## Inline Usage
+
+You may also pass `Validator` parameter directly to the component to inline the `AbstractValidator` implementation instead of relying on Dependency Injection mechanism:
+
+```html
+<FluentValidator Validator="FormValidator"></FluentValidator>
+```
+
+```cs
+@using FluentValidation;
+@code {
+    class FormModelValidator : AbstractValidator<FormModel> {
+        public MyValidator()
+        {
+            RuleFor(Q => Q.Name).NotEmpty().MaximumLength(255);
+        }
+    }
+
+    FormModelValidator FormValidator = new FormModelValidator();
+}
+```
+
 ## Asynchronous Warning
 
 Due to buggy UI when using `async void` on `CurrentEditContext.OnValidationRequested` and `CurrentEditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), the validator is run synchronously.
@@ -73,3 +95,15 @@ Due to buggy UI when using `async void` on `CurrentEditContext.OnValidationReque
 **This should not stop you from writing asynchronous validation methods because Fluent Validator will force run asynchronous method synchronously when called synchronously.**
 
 *Just something to keep in mind when coding!*
+
+## Repeated Remote Call Warning :warning:
+
+**By default, Fluent Validation does not short circuit the validation chain on first error.**
+
+This may cause problem when a validation hits the database / remote service multiple times in short burst due to validation triggers on field change!
+
+To reduce the impact of repeated custom validation calls, use:
+
+- `.Cascade(CascadeMode.StopOnFirstFailure)` after `RuleFor()` chain,
+
+- Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
