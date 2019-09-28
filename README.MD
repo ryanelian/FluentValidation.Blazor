@@ -1,6 +1,8 @@
 # FluentValidation.Blazor
 
-<img align="right" width="128" height="128" src="https://raw.githubusercontent.com/ryanelian/FluentValidation.Blazor/master/FluentValidation.Blazor/img/icon.png" />
+<a href="https://github.com/ryanelian/FluentValidation.Blazor/blob/master/README.MD">
+    <img align="right" width="128" height="128" src="https://raw.githubusercontent.com/ryanelian/FluentValidation.Blazor/master/FluentValidation.Blazor/img/icon.png" />
+</a>
 
 > Fluent Validation-powered Blazor component for validating standard EditForm :cyclone: :white_check_mark:
 
