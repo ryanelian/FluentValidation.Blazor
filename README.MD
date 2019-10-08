@@ -128,7 +128,7 @@ To reduce the impact of repeated custom validation calls, use:
 
 - Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
 
-## FluentValidation.DependencyInjectionExtensions Functions
+## FluentValidation.DependencyInjectionExtensions
 
 ```
 dotnet add package FluentValidation.DependencyInjectionExtensions
@@ -140,7 +140,7 @@ services.AddValidatorsFromAssemblyContaining<Program>();
 
 **Can be used to auto-populate all validators from current application / other project automatically!**
 
-However, [`InjectServiceProvider`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting FluentValidation author comment)
+However, [`InjectServiceProvider`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting @JeremySkinner comment)
 
 > [Making use of InjectValidator or GetServiceProvider is only supported when using the automatic MVC integration.](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L64)
 
