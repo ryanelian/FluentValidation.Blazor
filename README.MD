@@ -15,7 +15,7 @@ dotnet add package FluentValidation
 dotnet add package Accelist.FluentValidation.Blazor
 ```
 
-## Usage
+## Getting Started
 
 This library is a direct replacement to [the default Blazor `<DataAnnotationValidator>`](https://docs.microsoft.com/en-us/aspnet/core/blazor/forms-validation?view=aspnetcore-3.0) with **zero configuration required** :zap: in the application code base:
 
@@ -27,29 +27,9 @@ This library is a direct replacement to [the default Blazor `<DataAnnotationVali
 
 
     <div class="form-group">
-        <label for="name">Name</label>
-        <InputText id="name" class="form-control" @bind-Value="Form.Name"></InputText>
-        <ValidationMessage For="() => Form.Name"></ValidationMessage>
-    </div>
-    <div class="form-group">
         <label for="email">Email</label>
         <InputText id="email" type="email" class="form-control" @bind-Value="Form.Email"></InputText>
         <ValidationMessage For="() => Form.Email"></ValidationMessage>
-    </div>
-    <div class="form-group">
-        <label for="phone_number">Phone Number</label>
-        <InputText id="phone_number" type="tel" class="form-control" @bind-Value="Form.PhoneNumber"></InputText>
-        <ValidationMessage For="() => Form.PhoneNumber"></ValidationMessage>
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <InputText id="password" type="password" class="form-control" @bind-Value="Form.Password"></InputText>
-        <ValidationMessage For="() => Form.Password"></ValidationMessage>
-    </div>
-    <div class="form-group">
-        <label for="password_verify">Verify Password</label>
-        <InputText id="password_verify" type="password" class="form-control" @bind-Value="Form.VerifyPassword"></InputText>
-        <ValidationMessage For="() => Form.VerifyPassword"></ValidationMessage>
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">
@@ -60,9 +40,30 @@ This library is a direct replacement to [the default Blazor `<DataAnnotationVali
 </EditForm>
 ```
 
+```cs
+@code {
+    FormModel Form = new FormModel();
+}
+```
+
+```cs
+public class FormModel
+{
+    public string Email { set; get; }
+}
+
+public class FormModelValidator : AbstractValidator<FormModel>
+{
+    public FormModelValidator()
+    {
+        RuleFor(Q => Q.Email).NotEmpty().EmailAddress().MaximumLength(255);
+    }
+}
+```
+
 The `<FluentValidation.FluentValidator>` component automatically detects the `Model` data type used by the parent `<EditForm>` then attempts to acquire the corresponding `FluentValidation.IValidator<T>` for that model data type.
 
-For this reason, [in addition to coding the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), **you are required to register the `FluentValidation.IValidator<T>` implementation in the Service Provider (Dependency Injection)**:
+For this reason, [in addition to coding the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), **you are required to register the `FluentValidation.IValidator<T>` implementation in the `Startup.cs` Service Provider (Dependency Injection)**:
 
 ```cs
 services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModelValidator>();
@@ -70,26 +71,40 @@ services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModel
 
 **This effectively allows you, dear programmer, to inject required services to your validation implementations for writing amazing custom validation methods!** :fire:
 
-## Inline Usage
+```cs
+public class FormModelValidator : AbstractValidator<FormModel>
+{
+    readonly AppDbContext DB;
+    readonly IServiceProvider SP;
+
+    public FormModelValidator(AppDbContext db, IServiceProvider sp)
+    {
+        this.DB = db;
+        this.SP = sp;
+
+        RuleFor(Q => Q.Email).NotEmpty().EmailAddress().MaximumLength(255)
+            .Must(BeUniqueEmail).WithMessage("Email address is already registered.");
+    }
+
+    bool BeUniqueEmail(string email)
+    {
+        var exist = DB.Account.Where(Q => Q.Email == email).Any();
+        return (exist == false);
+    }
+}
+```
+
+## Inlined Validator
 
  `Validator` parameter may also be passed directly to the component to inline the `AbstractValidator` implementation instead of relying on DI mechanism:
 
 ```html
-<FluentValidator Validator="FormValidator"></FluentValidator>
+<FluentValidator Validator="Validator"></FluentValidator>
 ```
 
 ```cs
-@using FluentValidation
 @code {
-    class FormModelValidator : AbstractValidator<FormModel> 
-    {
-        public MyValidator()
-        {
-            RuleFor(Q => Q.Name).NotEmpty().MaximumLength(255);
-        }
-    }
-
-    FormModelValidator FormValidator = new FormModelValidator();
+    FormModelValidator Validator = new FormModelValidator();
 }
 ```
 
@@ -112,6 +127,34 @@ To reduce the impact of repeated custom validation calls, use:
 - `.Cascade(CascadeMode.StopOnFirstFailure)` after `RuleFor()` chain,
 
 - Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
+
+## FluentValidation.DependencyInjectionExtensions Functions
+
+```
+dotnet add package FluentValidation.DependencyInjectionExtensions
+```
+
+```cs
+services.AddValidatorsFromAssemblyContaining<Program>();
+```
+
+**Can be used to auto-populate all validators from current application / other project automatically!**
+
+However, [`InjectServiceProvider`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting FluentValidation author comment)
+
+> [Making use of InjectValidator or GetServiceProvider is only supported when using the automatic MVC integration.](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L64)
+
+That said, the built-in `SetValidator` method can still be used with an injected `IValidator<T>` object instead:
+
+```cs
+public class FormModelValidator : AbstractValidator<FormModel>
+{
+    public FormModelValidator(IValidator<SomeProperty> somePropertyValidator)
+    {
+        RuleFor(Q => Q.SomeProperty).SetValidator(somePropertyValidator);
+    }
+}
+```
 
 ## Why Not Just Use `<DataAnnotationValidator>`?
 

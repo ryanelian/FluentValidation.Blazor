@@ -33,7 +33,8 @@ namespace Demo
             services.AddSingleton<WeatherForecastService>();
 
             services.AddTransient<EmailCheckerService>();
-            services.AddTransient<IValidator<FormModel2>, FormModel2Validator>();
+            // services.AddTransient<IValidator<FormModel2>, FormModel2Validator>();
+            services.AddValidatorsFromAssemblyContaining<Program>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
