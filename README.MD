@@ -4,7 +4,7 @@
     <img align="right" width="128" height="128" src="https://raw.githubusercontent.com/ryanelian/FluentValidation.Blazor/master/FluentValidation.Blazor/img/icon.png" />
 </a>
 
-> [Fluent Validation](https://github.com/JeremySkinner/FluentValidation)-powered Blazor component for validating standard EditForm :cyclone: :white_check_mark:
+> [Fluent Validation](https://github.com/JeremySkinner/FluentValidation)-powered Blazor component for validating standard \<EditForm> :cyclone: :white_check_mark:
 
 [![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master) [![NuGet](https://badgen.net/nuget/v/Accelist.FluentValidation.Blazor?icon=nuget)](https://www.nuget.org/packages/Accelist.FluentValidation.Blazor) [![Accelist.FluentValidation.Blazor package in test feed in Azure Artifacts](https://feeds.dev.azure.com/ryanelian/e48e1156-bc00-4459-a15d-e8aac1c98eaa/_apis/public/Packaging/Feeds/fc2537b4-7482-4b4a-a6e1-46dab8061c18/Packages/0796d05d-fde5-430c-91b2-33b6d8c7d3c5/Badge)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_packaging?_a=package&feed=fc2537b4-7482-4b4a-a6e1-46dab8061c18&package=0796d05d-fde5-430c-91b2-33b6d8c7d3c5&preferRelease=true)
 
@@ -140,7 +140,7 @@ services.AddValidatorsFromAssemblyContaining<Program>();
 
 **Can be used to auto-populate all validators from current application / other project automatically!**
 
-However, [`InjectServiceProvider`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting @JeremySkinner comment)
+However, [`InjectValidator`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting @JeremySkinner comment)
 
 > [Making use of InjectValidator or GetServiceProvider is only supported when using the automatic MVC integration.](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L64)
 
