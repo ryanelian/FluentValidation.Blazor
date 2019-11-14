@@ -29,9 +29,15 @@ namespace FluentValidation
         [Parameter]
         public IValidator Validator { set; get; }
 
+        /// <summary>
+        /// Objects nested under the form Model object.
+        /// </summary>
         [Parameter]
         public List<object> ChildModels { get; set; }
 
+        /// <summary>
+        /// Validators for objects nested under the form Model object.
+        /// </summary>
         [Parameter]
         public List<IValidator> ChildModelValidators { get; set; }
 
@@ -140,6 +146,7 @@ namespace FluentValidation
             var validatedModel= editContext.Model;
             var validator = Validator;
 
+            // Check if any child model validator matches
             if (ChildModelValidators != null) {
                 foreach (IValidator childModelValidator in ChildModelValidators) {
                     if (childModelValidator.CanValidateInstancesOfType(fieldIdentifier.Model.GetType())) {
