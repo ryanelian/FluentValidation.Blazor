@@ -29,6 +29,12 @@ namespace FluentValidation
         [Parameter]
         public IValidator Validator { set; get; }
 
+        [Parameter]
+        public List<object> ChildModels { get; set; }
+
+        [Parameter]
+        public List<IValidator> ChildModelValidators { get; set; }
+
         /// <summary>
         /// Attach to parent EditForm context enabling validation.
         /// </summary>
@@ -41,30 +47,46 @@ namespace FluentValidation
                     $"inside an EditForm.");
             }
 
-            if (this.Validator == null)
-            {
-                this.GetValidator();
-            }
-            
+            this.GetValidators();
+
             this.AddValidation();
         }
 
         /// <summary>
         /// Try acquiring the form validator implementation from the DI.
         /// </summary>
-        private void GetValidator()
+        private void GetValidators()
+        {
+            if (this.Validator == null)
+            {
+                Validator = this.GetValidator(CurrentEditContext.Model.GetType());
+            }
+
+            if (ChildModels != null && ChildModelValidators == null)
+            {
+                ChildModelValidators = new List<IValidator>();
+
+                foreach (var childModel in ChildModels)
+                {
+                    ChildModelValidators.Add(this.GetValidator(childModel.GetType()));
+                }
+            }
+        }
+
+        private IValidator GetValidator(Type formType)
         {
             var validatorType = typeof(IValidator<>);
-            var formType = CurrentEditContext.Model.GetType();
             var formValidatorType = validatorType.MakeGenericType(formType);
 
-            this.Validator = ServiceProvider.GetService(formValidatorType) as IValidator;
+            var validator = ServiceProvider.GetService(formValidatorType) as IValidator;
 
-            if (this.Validator == null)
+            if (validator == null)
             {
                 throw new InvalidOperationException($"FluentValidation.IValidator<{formType.FullName}> is"
                     + " not registered in the application service provider.");
             }
+
+            return validator;
         }
 
         /// <summary>
@@ -114,14 +136,28 @@ namespace FluentValidation
         private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
         {
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = new ValidationContext(editContext.Model, new FluentValidation.Internal.PropertyChain(), vselector);
-            var validationResults = Validator.Validate(vctx);
+
+            var validatedModel= editContext.Model;
+            var validator = Validator;
+
+            if (ChildModelValidators != null) {
+                foreach (IValidator childModelValidator in ChildModelValidators) {
+                    if (childModelValidator.CanValidateInstancesOfType(fieldIdentifier.Model.GetType())) {
+                        validatedModel = fieldIdentifier.Model;
+                        validator = childModelValidator;
+                        break;
+                    }
+                }
+            }
+
+            var vctx = new ValidationContext(validatedModel, new FluentValidation.Internal.PropertyChain(), vselector);
+            var validationResults = validator.Validate(vctx);
 
             messages.Clear(fieldIdentifier);
 
             foreach (var error in validationResults.Errors)
             {
-                var fieldID = editContext.Field(error.PropertyName);
+                var fieldID = new FieldIdentifier(validatedModel, error.PropertyName);
                 messages.Add(fieldID, error.ErrorMessage);
             }
 
