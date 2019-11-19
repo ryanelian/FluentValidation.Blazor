@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Components.Forms;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using FluentValidation.Results;
 
 namespace FluentValidation
 {
@@ -118,16 +120,46 @@ namespace FluentValidation
         /// <param name="messages"></param>
         private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
-            // ATTENTION: DO NOT USE Async Void + ValidateAsync
-            // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
-            var validationResults = Validator.Validate(editContext.Model);
+            var combinedValidationFailures = new List<(ValidationFailure failure, object model)>();
+            var vselector = new NoCascadeValidatorSelector();
+
+            void ExecuteValidator(IValidator validator, object model)
+            {
+                var vctx = new ValidationContext(model, new FluentValidation.Internal.PropertyChain(), vselector);
+
+                // ATTENTION: DO NOT USE Async Void + ValidateAsync
+                // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
+                var validationResult = validator.Validate(vctx);
+                combinedValidationFailures.AddRange(
+                    validationResult.Errors.Select(f => (f, model))
+                );
+            }
+
+            ExecuteValidator(Validator, editContext.Model);
+
+            // For this to work, we need to know what instances to check,
+            // since we don't get any other information from the context.
+            if (ChildModels != null)
+            {
+                foreach (object childModel in ChildModels)
+                {
+                    Type childModelType = childModel.GetType();
+                    foreach (var childModelValidator in ChildModelValidators)
+                    {
+                        if (childModelValidator.CanValidateInstancesOfType(childModelType))
+                        {
+                            ExecuteValidator(childModelValidator, childModel);
+                        }
+                    }
+                }
+            }
 
             messages.Clear();
 
-            foreach (var error in validationResults.Errors)
+            foreach (var failureModelTuple in combinedValidationFailures)
             {
-                var fieldID = editContext.Field(error.PropertyName);
-                messages.Add(fieldID, error.ErrorMessage);
+                var fieldID = new FieldIdentifier(failureModelTuple.model, failureModelTuple.failure.PropertyName);
+                messages.Add(fieldID, failureModelTuple.failure.ErrorMessage);
             }
 
             editContext.NotifyValidationStateChanged();
