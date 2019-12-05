@@ -30,6 +30,12 @@ namespace FluentValidation
         public IValidator Validator { set; get; }
 
         /// <summary>
+        /// The AbstractValidator objects mapping for each children / nested object validators.
+        /// </summary>
+        [Parameter]
+        public Dictionary<Type, IValidator> ChildValidators { set; get; }
+
+        /// <summary>
         /// Attach to parent EditForm context enabling validation.
         /// </summary>
         protected override void OnInitialized()
@@ -43,28 +49,38 @@ namespace FluentValidation
 
             if (this.Validator == null)
             {
-                this.GetValidator();
+                this.SetFormValidator();
             }
-            
+
             this.AddValidation();
         }
 
         /// <summary>
-        /// Try acquiring the form validator implementation from the DI.
+        /// Try setting the EditContext form model typed validator implementation from the DI.
         /// </summary>
-        private void GetValidator()
+        private void SetFormValidator()
+        {
+            var formType = CurrentEditContext.Model.GetType();
+            this.Validator = GetTypedValidator(formType);
+        }
+
+        /// <summary>
+        /// Try acquiring the typed validator implementation from the DI.
+        /// </summary>
+        /// <param name="modelType"></param>
+        /// <returns></returns>
+        private IValidator GetTypedValidator(Type modelType)
         {
             var validatorType = typeof(IValidator<>);
-            var formType = CurrentEditContext.Model.GetType();
-            var formValidatorType = validatorType.MakeGenericType(formType);
-
-            this.Validator = ServiceProvider.GetService(formValidatorType) as IValidator;
-
-            if (this.Validator == null)
+            var formValidatorType = validatorType.MakeGenericType(modelType);
+            IValidator validator = ServiceProvider.GetService(formValidatorType) as IValidator;
+            if (validator == null)
             {
-                throw new InvalidOperationException($"FluentValidation.IValidator<{formType.FullName}> is"
+                throw new InvalidOperationException($"FluentValidation.IValidator<{modelType.FullName}> is"
                     + " not registered in the application service provider.");
             }
+
+            return validator;
         }
 
         /// <summary>
@@ -98,8 +114,28 @@ namespace FluentValidation
 
             foreach (var error in validationResults.Errors)
             {
-                var fieldID = editContext.Field(error.PropertyName);
-                messages.Add(fieldID, error.ErrorMessage);
+                var model = editContext.Model;
+                var fieldName = error.PropertyName;
+
+                // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.StringX"
+                // However, Blazor does NOT recognize nested FieldIdentifier.
+                // Instead, the FieldIdentifier is assigned to the object in question. (Model + Property Name)
+                // Therefore, we need to traverse the object graph to acquire them!
+                if (fieldName.Contains("."))
+                {
+                    var objectParts = fieldName.Split('.');
+                    fieldName = objectParts[objectParts.Length - 1];
+                    for (var i = 0; i < objectParts.Length - 1; i++)
+                    {
+                        model = model?.GetType().GetProperty(objectParts[i])?.GetValue(model, null);
+                    }
+                }
+
+                if (model != null)
+                {
+                    var fieldID = new FieldIdentifier(model, fieldName);
+                    messages.Add(fieldID, error.ErrorMessage);
+                }
             }
 
             editContext.NotifyValidationStateChanged();
@@ -113,16 +149,28 @@ namespace FluentValidation
         /// <param name="fieldIdentifier"></param>
         private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
         {
+            var fieldValidator = Validator;
+            if (fieldIdentifier.Model != editContext.Model)
+            {
+                var fieldModelType = fieldIdentifier.Model.GetType();
+                if (ChildValidators != null && ChildValidators.ContainsKey(fieldModelType)) 
+                {
+                    fieldValidator = ChildValidators[fieldModelType];
+                } else
+                {
+                    fieldValidator = GetTypedValidator(fieldModelType);
+                }
+            }
+
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = new ValidationContext(editContext.Model, new FluentValidation.Internal.PropertyChain(), vselector);
-            var validationResults = Validator.Validate(vctx);
+            var vctx = new ValidationContext(fieldIdentifier.Model, new FluentValidation.Internal.PropertyChain(), vselector);
+            var validationResults = fieldValidator.Validate(vctx);
 
             messages.Clear(fieldIdentifier);
 
             foreach (var error in validationResults.Errors)
             {
-                var fieldID = editContext.Field(error.PropertyName);
-                messages.Add(fieldID, error.ErrorMessage);
+                messages.Add(fieldIdentifier, error.ErrorMessage);
             }
 
             editContext.NotifyValidationStateChanged();

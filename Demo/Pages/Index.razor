@@ -26,6 +26,12 @@
         <ValidationMessage For="() => Form2.Email"></ValidationMessage>
     </div>
     <div class="form-group">
+        <label for="email">Sub-Field</label>
+        <InputText id="email" class="form-control" @bind-Value="Form2.FormModel3.SubField"></InputText>
+        <ValidationMessage For="() => Form2.FormModel3"></ValidationMessage>
+        <ValidationMessage For="() => Form2.FormModel3.SubField"></ValidationMessage>
+    </div>
+    <div class="form-group">
         <button type="submit" class="btn btn-primary">
             Submit
         </button>
@@ -50,5 +56,8 @@
     FormModel1 Form1 = new FormModel1();
     FormModel1Validator Form1Validator = new FormModel1Validator();
 
-    FormModel2 Form2 = new FormModel2();
+    FormModel2 Form2 = new FormModel2
+    {
+        FormModel3 = new FormModel3()
+    };
 }

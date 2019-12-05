@@ -108,6 +108,24 @@ public class FormModelValidator : AbstractValidator<FormModel>
 }
 ```
 
+## Nested Validation
+
+FluentValidation offers `SetValidator` method for validating nested objects. Combined with Dependency Injection capability of this component library, a nested form can be validated easily:
+
+```cs
+public class RootValidator : AbstractValidator<Root>
+{
+    public RootValidator(IValidator<Child> childValidator)
+    {
+        RuleFor(Q => Q.Child).SetValidator(childValidator);
+    }
+}
+```
+
+**The validator of the nested object MUST be registered in the service provider!**
+
+If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (`Dictionary<Type, IValidator>` containing children validators used) MUST be passed into the component due to technical reasons.
+
 ## Asynchronous Warning
 
 Due to buggy UI when using `async void` on `EditContext.OnValidationRequested` and `EditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), **the validator is run synchronously**.

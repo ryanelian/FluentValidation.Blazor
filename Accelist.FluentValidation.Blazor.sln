@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Accelist.FluentValidation.Blazor", "FluentValidation.Blazor\Accelist.FluentValidation.Blazor.csproj", "{774DBB06-F9E7-495A-BE80-8BEE176B3194}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{312A7B7D-69CE-4717-A3F4-36283B072147}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo", "Demo\Demo.csproj", "{312A7B7D-69CE-4717-A3F4-36283B072147}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
