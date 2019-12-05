@@ -108,16 +108,17 @@ public class FormModelValidator : AbstractValidator<FormModel>
 }
 ```
 
-## Nested Validation
+## Nested Objects & Arrays Validation
 
-FluentValidation offers `SetValidator` method for validating nested objects. Combined with Dependency Injection capability of this component library, a nested form can be validated easily:
+FluentValidation offers `SetValidator` method for validating nested objects and arrays. Combined with Dependency Injection capability of this component library, a complex form can be validated easily:
 
 ```cs
 public class RootValidator : AbstractValidator<Root>
 {
-    public RootValidator(IValidator<Child> childValidator)
+    public RootValidator(IValidator<Child> childValidator, IValidator<Item> itemValidator)
     {
         RuleFor(Q => Q.Child).SetValidator(childValidator);
+        RuleForEach(Q => Q.ArrayOfItems).SetValidator(itemValidator); // Array, List, IList, ...
     }
 }
 ```

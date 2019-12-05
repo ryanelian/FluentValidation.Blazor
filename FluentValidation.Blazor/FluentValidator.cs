@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -117,7 +118,7 @@ namespace FluentValidation
                 var model = editContext.Model;
                 var fieldName = error.PropertyName;
 
-                // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.StringX"
+                // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.PropertyX"
                 // However, Blazor does NOT recognize nested FieldIdentifier.
                 // Instead, the FieldIdentifier is assigned to the object in question. (Model + Property Name)
                 // Therefore, we need to traverse the object graph to acquire them!
@@ -127,7 +128,26 @@ namespace FluentValidation
                     fieldName = objectParts[objectParts.Length - 1];
                     for (var i = 0; i < objectParts.Length - 1; i++)
                     {
-                        model = model?.GetType().GetProperty(objectParts[i])?.GetValue(model, null);
+                        var propertyName = objectParts[i];
+                        int? arrayIndex = null;
+                        if (propertyName.Contains("[") && propertyName.Contains("]"))
+                        {
+                            var indexedPropertyName = propertyName.Split('[', ']');
+                            propertyName = indexedPropertyName[0];
+                            arrayIndex = int.Parse(indexedPropertyName[1]);
+                        }
+
+                        model = model?.GetType().GetProperty(propertyName)?.GetValue(model);
+                        if (arrayIndex != null && model is IList array)
+                        {
+                            // System.Array implements IList https://docs.microsoft.com/en-us/dotnet/api/system.array?view=netcore-3.0
+                            model = array[arrayIndex.Value];
+                        }
+
+                        if (model == null)
+                        {
+                            break;
+                        }
                     }
                 }
 
@@ -153,10 +173,11 @@ namespace FluentValidation
             if (fieldIdentifier.Model != editContext.Model)
             {
                 var fieldModelType = fieldIdentifier.Model.GetType();
-                if (ChildValidators != null && ChildValidators.ContainsKey(fieldModelType)) 
+                if (ChildValidators != null && ChildValidators.ContainsKey(fieldModelType))
                 {
                     fieldValidator = ChildValidators[fieldModelType];
-                } else
+                }
+                else
                 {
                     fieldValidator = GetTypedValidator(fieldModelType);
                 }

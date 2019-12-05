@@ -23,7 +23,7 @@ Validator parameter may also be passed directly to the component to inline the A
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
