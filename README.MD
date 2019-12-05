@@ -6,7 +6,7 @@
 
 > [Fluent Validation](https://github.com/JeremySkinner/FluentValidation)-powered Blazor component for validating standard \<EditForm> :cyclone: :white_check_mark:
 
-[![Build Status](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_apis/build/status/ryanelian.FluentValidation.Blazor?branchName=master)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_build/latest?definitionId=4&branchName=master) [![NuGet](https://badgen.net/nuget/v/Accelist.FluentValidation.Blazor?icon=nuget)](https://www.nuget.org/packages/Accelist.FluentValidation.Blazor) [![Accelist.FluentValidation.Blazor package in test feed in Azure Artifacts](https://feeds.dev.azure.com/ryanelian/e48e1156-bc00-4459-a15d-e8aac1c98eaa/_apis/public/Packaging/Feeds/fc2537b4-7482-4b4a-a6e1-46dab8061c18/Packages/0796d05d-fde5-430c-91b2-33b6d8c7d3c5/Badge)](https://dev.azure.com/ryanelian/FluentValidation.Blazor/_packaging?_a=package&feed=fc2537b4-7482-4b4a-a6e1-46dab8061c18&package=0796d05d-fde5-430c-91b2-33b6d8c7d3c5&preferRelease=true)
+[![GitHub Actions](https://github.com/ryanelian/FluentValidation.Blazor/workflows/.NET%20Core/badge.svg)](https://github.com/ryanelian/FluentValidation.Blazor/actions) [![NuGet](https://badgen.net/nuget/v/Accelist.FluentValidation.Blazor?icon=nuget)](https://www.nuget.org/packages/Accelist.FluentValidation.Blazor)
 
 ## Install
 
@@ -124,7 +124,7 @@ public class RootValidator : AbstractValidator<Root>
 
 **The validator of the nested object MUST be registered in the service provider!**
 
-If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (`Dictionary<Type, IValidator>` containing children validators used) MUST be passed into the component due to technical reasons.
+If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` containing children validators used) MUST be passed into the component due to technical reasons.
 
 ## Asynchronous Warning
 
