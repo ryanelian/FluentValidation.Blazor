@@ -34,7 +34,7 @@ namespace FluentValidation
         /// The AbstractValidator objects mapping for each children / nested object validators.
         /// </summary>
         [Parameter]
-        public Dictionary<Type, IValidator> ChildValidators { set; get; }
+        public Dictionary<Type, IValidator> ChildValidators { set; get; } = new Dictionary<Type, IValidator>();
 
         /// <summary>
         /// Attach to parent EditForm context enabling validation.
@@ -172,15 +172,12 @@ namespace FluentValidation
             var fieldValidator = Validator;
             if (fieldIdentifier.Model != editContext.Model)
             {
-                var fieldModelType = fieldIdentifier.Model.GetType();
-                if (ChildValidators != null && ChildValidators.ContainsKey(fieldModelType))
+                var modelType = fieldIdentifier.Model.GetType();
+                if (ChildValidators.ContainsKey(modelType) == false)
                 {
-                    fieldValidator = ChildValidators[fieldModelType];
+                    ChildValidators[modelType] = GetTypedValidator(modelType);
                 }
-                else
-                {
-                    fieldValidator = GetTypedValidator(fieldModelType);
-                }
+                fieldValidator = ChildValidators[modelType];
             }
 
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
