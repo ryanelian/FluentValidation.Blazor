@@ -14,11 +14,18 @@ namespace Demo.Models
         public FormModel3 FormModel3 { set; get; }
 
         public List<FormModel3> SubArray { set; get; }
+
+        public MustNotValidate NotAForm { set; get; }
     }
 
     public class FormModel3
     {
         public string SubField { set; get; }
+    }
+
+    public class MustNotValidate
+    {
+        public string ShouldNotValidate { set; get; }
     }
 
     public class FormModel2Validator : AbstractValidator<FormModel2>

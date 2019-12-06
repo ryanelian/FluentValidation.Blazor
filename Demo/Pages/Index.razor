@@ -26,14 +26,24 @@
         <ValidationMessage For="() => Form2.Email"></ValidationMessage>
     </div>
     <div class="form-group">
-        <label for="email">Field of a Nested Object</label>
-        <InputText id="email" class="form-control" @bind-Value="Form2.FormModel3.SubField"></InputText>
+        <label for="child">Field of a Nested Object</label>
+        <InputText id="child" class="form-control" @bind-Value="Form2.FormModel3.SubField"></InputText>
         <ValidationMessage For="() => Form2.FormModel3.SubField"></ValidationMessage>
     </div>
     <div class="form-group">
-        <label for="email">Field of an Array [Item #0]</label>
-        <InputText id="email" class="form-control" @bind-Value="Form2.SubArray[0].SubField"></InputText>
-        <ValidationMessage For="() => Form2.SubArray[0].SubField"></ValidationMessage>
+        <label for="item0">Field of an Array [Item #0]</label>
+        <InputText id="item0" class="form-control" @bind-Value="Form2.SubArray[0].SubField"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="item1">Field of an Array [Item #1]</label>
+        <InputText id="item1" class="form-control" @bind-Value="Form2.SubArray[1].SubField"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="novalidate">Should Not Validate</label>
+        <InputText id="novalidate" class="form-control" @bind-Value="Form2.NotAForm.ShouldNotValidate"></InputText>
+    </div>
+    <div class="form-group">
+        <ValidationSummary></ValidationSummary>
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">
@@ -63,6 +73,7 @@
     FormModel2 Form2 = new FormModel2
     {
         FormModel3 = new FormModel3(),
-        SubArray = new List<FormModel3> { new FormModel3 { } }
+        SubArray = new List<FormModel3> { new FormModel3 { }, new FormModel3 { } },
+        NotAForm = new MustNotValidate()
     };
 }
