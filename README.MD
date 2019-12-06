@@ -123,9 +123,9 @@ public class RootValidator : AbstractValidator<Root>
 }
 ```
 
-**The validator of the nested object MUST be registered in the service provider!**
+**The validators used MUST be registered in the service provider!**
 
-If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` containing children validators used) MUST be passed into the component due to technical reasons.
+> If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` defining validators used for each children model types) MUST be passed into the component due to technical reasons.
 
 ## Asynchronous Warning
 
@@ -163,17 +163,7 @@ However, [`InjectValidator`](https://github.com/JeremySkinner/FluentValidation/b
 
 > [Making use of InjectValidator or GetServiceProvider is only supported when using the automatic MVC integration.](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L64)
 
-That said, the built-in `SetValidator` method can still be used with an injected `IValidator<T>` object instead:
-
-```cs
-public class FormModelValidator : AbstractValidator<FormModel>
-{
-    public FormModelValidator(IValidator<SomeProperty> somePropertyValidator)
-    {
-        RuleFor(Q => Q.SomeProperty).SetValidator(somePropertyValidator);
-    }
-}
-```
+That said, the built-in `SetValidator` method can still be used with an injected `IValidator<T>` object instead.
 
 ## Why Not Just Use `<DataAnnotationValidator>`?
 
