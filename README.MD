@@ -123,9 +123,9 @@ public class RootValidator : AbstractValidator<Root>
 }
 ```
 
-**The validators used MUST be registered in the service provider!**
+**The validators used MUST be registered in the ASP.NET Core service provider!**
 
-> If for some reason Dependency Injection is not possible (validator is not registered in the ASP.NET service provider), the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` defining validators used for each children model types) MUST be passed into the component due to technical reasons.
+> If for some reason Dependency Injection is not possible, the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` defining validators used for each children model types) MUST be passed into the component due to technical reasons.
 
 ## Asynchronous Warning
 
