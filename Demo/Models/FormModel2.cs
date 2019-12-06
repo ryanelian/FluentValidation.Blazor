@@ -12,11 +12,20 @@ namespace Demo.Models
         public string Email { set; get; }
 
         public FormModel3 FormModel3 { set; get; }
+
+        public List<FormModel3> SubArray { set; get; }
+
+        public MustNotValidate NotAForm { set; get; }
     }
 
     public class FormModel3
     {
         public string SubField { set; get; }
+    }
+
+    public class MustNotValidate
+    {
+        public string ShouldNotValidate { set; get; }
     }
 
     public class FormModel2Validator : AbstractValidator<FormModel2>
@@ -32,6 +41,7 @@ namespace Demo.Models
                 .MustAsync(EmailAvailableAsync).WithMessage(o => $"Email {o.Email} is not available.");
 
             RuleFor(Q => Q.FormModel3).SetValidator(subValidator);
+            RuleForEach(Q => Q.SubArray).SetValidator(subValidator);
         }
 
         public async Task<bool> EmailAvailableAsync(string email, System.Threading.CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -33,7 +34,7 @@ namespace FluentValidation
         /// The AbstractValidator objects mapping for each children / nested object validators.
         /// </summary>
         [Parameter]
-        public Dictionary<Type, IValidator> ChildValidators { set; get; }
+        public Dictionary<Type, IValidator> ChildValidators { set; get; } = new Dictionary<Type, IValidator>();
 
         /// <summary>
         /// Attach to parent EditForm context enabling validation.
@@ -62,6 +63,11 @@ namespace FluentValidation
         {
             var formType = CurrentEditContext.Model.GetType();
             this.Validator = GetTypedValidator(formType);
+            if (this.Validator == null)
+            {
+                throw new InvalidOperationException($"FluentValidation.IValidator<{formType.FullName}> is"
+                    + " not registered in the application service provider.");
+            }
         }
 
         /// <summary>
@@ -73,14 +79,7 @@ namespace FluentValidation
         {
             var validatorType = typeof(IValidator<>);
             var formValidatorType = validatorType.MakeGenericType(modelType);
-            IValidator validator = ServiceProvider.GetService(formValidatorType) as IValidator;
-            if (validator == null)
-            {
-                throw new InvalidOperationException($"FluentValidation.IValidator<{modelType.FullName}> is"
-                    + " not registered in the application service provider.");
-            }
-
-            return validator;
+            return ServiceProvider.GetService(formValidatorType) as IValidator;
         }
 
         /// <summary>
@@ -112,33 +111,90 @@ namespace FluentValidation
 
             messages.Clear();
 
+            var modelGraphCache = new Dictionary<string, object>();
             foreach (var error in validationResults.Errors)
             {
-                var model = editContext.Model;
-                var fieldName = error.PropertyName;
-
-                // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.StringX"
-                // However, Blazor does NOT recognize nested FieldIdentifier.
-                // Instead, the FieldIdentifier is assigned to the object in question. (Model + Property Name)
-                // Therefore, we need to traverse the object graph to acquire them!
-                if (fieldName.Contains("."))
+                var (propertyValue, propertyName) = EvalObjectProperty(editContext.Model, error.PropertyName, modelGraphCache);
+                if (propertyValue != null)
                 {
-                    var objectParts = fieldName.Split('.');
-                    fieldName = objectParts[objectParts.Length - 1];
-                    for (var i = 0; i < objectParts.Length - 1; i++)
-                    {
-                        model = model?.GetType().GetProperty(objectParts[i])?.GetValue(model, null);
-                    }
-                }
-
-                if (model != null)
-                {
-                    var fieldID = new FieldIdentifier(model, fieldName);
+                    var fieldID = new FieldIdentifier(propertyValue, propertyName);
                     messages.Add(fieldID, error.ErrorMessage);
                 }
             }
 
             editContext.NotifyValidationStateChanged();
+        }
+
+        /// <summary>
+        /// Get object property value by string path separated by dot, supports array (IList) syntax.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="propertyPath"></param>
+        /// <param name="cache"></param>
+        /// <returns></returns>
+        private (object propertyValue, string propertyName) EvalObjectProperty(object model, string propertyPath, Dictionary<string, object> cache)
+        {
+            if (propertyPath.Contains(".") == false)
+            {
+                return (model, propertyPath);
+            }
+
+            // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.PropertyX"
+            // However, Blazor does NOT recognize nested FieldIdentifier.
+            // Instead, the FieldIdentifier is assigned to the object in question. (Model + Property Name)
+            // Therefore, we need to traverse the object graph to acquire them!
+            var modelObjectPath = "";
+            var objectParts = propertyPath.Split('.');
+            var fieldName = objectParts[objectParts.Length - 1];
+            for (var i = 0; i < objectParts.Length - 1; i++)
+            {
+                var propertyName = objectParts[i];
+                bool isArray = false;
+                int arrayIndex = 0;
+                if (propertyName.Contains("[") && propertyName.Contains("]"))
+                {
+                    // propertyName = "A[22]" --> ["A", "22"]
+                    var indexedPropertyName = propertyName.Split('[', ']');
+                    propertyName = indexedPropertyName[0];
+                    isArray = true;
+                    arrayIndex = int.Parse(indexedPropertyName[1]);
+                }
+
+                // Constructing model object path here allows capturing the same array objects without the index!
+                if (string.IsNullOrEmpty(modelObjectPath))
+                {
+                    modelObjectPath = propertyName;
+                }
+                else
+                {
+                    modelObjectPath += "." + propertyName;
+                }
+
+                // Locally cache objects found along the way to prevent slow multiple reflection method calls
+                // For Example: large array of 1000 elements will only use reflection on that array object once!
+                if (cache.ContainsKey(modelObjectPath))
+                {
+                    model = cache[modelObjectPath];
+                }
+                else
+                {
+                    model = model.GetType().GetProperty(propertyName)?.GetValue(model);
+                    cache[modelObjectPath] = model;
+                }
+
+                if (isArray && model is IList array)
+                {
+                    // System.Array implements IList https://docs.microsoft.com/en-us/dotnet/api/system.array?view=netcore-3.0
+                    model = array[arrayIndex];
+                }
+
+                if (model == null)
+                {
+                    break;
+                }
+            }
+
+            return (model, fieldName);
         }
 
         /// <summary>
@@ -152,13 +208,20 @@ namespace FluentValidation
             var fieldValidator = Validator;
             if (fieldIdentifier.Model != editContext.Model)
             {
-                var fieldModelType = fieldIdentifier.Model.GetType();
-                if (ChildValidators != null && ChildValidators.ContainsKey(fieldModelType)) 
+                var modelType = fieldIdentifier.Model.GetType();
+                if (ChildValidators.ContainsKey(modelType))
                 {
-                    fieldValidator = ChildValidators[fieldModelType];
-                } else
+                    fieldValidator = ChildValidators[modelType];
+                }
+                else
                 {
-                    fieldValidator = GetTypedValidator(fieldModelType);
+                    fieldValidator = GetTypedValidator(modelType);
+                    ChildValidators[modelType] = fieldValidator;
+                }
+                if (fieldValidator == null)
+                {
+                    // Should not error / just fail silently for classes not supposed to be validated.
+                    return;
                 }
             }
 
