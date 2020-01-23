@@ -96,7 +96,7 @@ public class FormModelValidator : AbstractValidator<FormModel>
 
 ## Inlined Validator
 
- `Validator` parameter may also be passed directly to the component to inline the `AbstractValidator` implementation instead of relying on DI mechanism:
+ `Validator` parameter may also be passed directly to the component to inline the `AbstractValidator` implementation instead of relying on .NET Core DI:
 
 ```html
 <FluentValidator Validator="Validator"></FluentValidator>

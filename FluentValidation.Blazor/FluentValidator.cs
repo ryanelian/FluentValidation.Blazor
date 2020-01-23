@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace FluentValidation
     /// <summary>
     /// Add Fluent Validator support to an EditContext.
     /// </summary>
-    public class FluentValidator : ComponentBase
+    public class FluentValidator : ComponentBase, IDisposable
     {
         /// <summary>
         /// Inherited object from the FormEdit component.
@@ -37,6 +38,11 @@ namespace FluentValidation
         public Dictionary<Type, IValidator> ChildValidators { set; get; } = new Dictionary<Type, IValidator>();
 
         /// <summary>
+        /// Isolate scoped DbContext to this component.
+        /// </summary>
+        public IServiceScope ServiceScope { get; private set; }
+
+        /// <summary>
         /// Attach to parent EditForm context enabling validation.
         /// </summary>
         protected override void OnInitialized()
@@ -47,6 +53,8 @@ namespace FluentValidation
                     $"parameter of type {nameof(EditContext)}. For example, you can use {nameof(DataAnnotationsValidator)} " +
                     $"inside an EditForm.");
             }
+
+            this.ServiceScope = ServiceProvider.CreateScope();
 
             if (this.Validator == null)
             {
@@ -79,7 +87,7 @@ namespace FluentValidation
         {
             var validatorType = typeof(IValidator<>);
             var formValidatorType = validatorType.MakeGenericType(modelType);
-            return ServiceProvider.GetService(formValidatorType) as IValidator;
+            return ServiceScope.ServiceProvider.GetService(formValidatorType) as IValidator;
         }
 
         /// <summary>
@@ -105,7 +113,7 @@ namespace FluentValidation
         /// <param name="messages"></param>
         private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
-            // ATTENTION: DO NOT USE Async Void + ValidateAsync
+            // ATTENTION: DO NOT USE Async Void + ValidateAsync here
             // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
             var validationResults = Validator.Validate(editContext.Model);
 
@@ -238,5 +246,46 @@ namespace FluentValidation
 
             editContext.NotifyValidationStateChanged();
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    ServiceScope.Dispose();
+                }
+
+                // Free unmanaged resources (unmanaged objects) and override a finalizer below.
+
+                // Set large fields to null.
+                ServiceScope = null;
+                Validator = null;
+                ChildValidators = null;
+
+                disposedValue = true;
+            }
+        }
+
+        // Override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~FluentValidator()
+        // {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // Uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }
