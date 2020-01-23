@@ -17,13 +17,18 @@ namespace FluentValidation
         /// Inherited object from the FormEdit component.
         /// </summary>
         [CascadingParameter]
-        EditContext CurrentEditContext { get; set; }
+        private EditContext CurrentEditContext { get; set; }
 
         /// <summary>
         /// Enable access to the ASP.NET Core Service Provider / DI.
         /// </summary>
         [Inject]
-        IServiceProvider ServiceProvider { get; set; }
+        private IServiceProvider ServiceProvider { get; set; }
+
+        /// <summary>
+        /// Isolate scoped DbContext to this component.
+        /// </summary>
+        private IServiceScope ServiceScope { get; set; }
 
         /// <summary>
         /// The AbstractValidator object for the corresponding form Model object type.
@@ -36,11 +41,6 @@ namespace FluentValidation
         /// </summary>
         [Parameter]
         public Dictionary<Type, IValidator> ChildValidators { set; get; } = new Dictionary<Type, IValidator>();
-
-        /// <summary>
-        /// Isolate scoped DbContext to this component.
-        /// </summary>
-        public IServiceScope ServiceScope { get; private set; }
 
         /// <summary>
         /// Attach to parent EditForm context enabling validation.
