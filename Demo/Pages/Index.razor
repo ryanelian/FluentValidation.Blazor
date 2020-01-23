@@ -30,10 +30,13 @@
         <InputText id="child" class="form-control" @bind-Value="Form2.FormModel3.SubField"></InputText>
         <ValidationMessage For="() => Form2.FormModel3.SubField"></ValidationMessage>
     </div>
-    @foreach (var item in Form2.SubArray)
+    @for (var i = 0; i < Form2.SubArray.Count; i++)
     {
+        var item = Form2.SubArray[i];
+        var itemNo = $"[Item #{i}]";
+
         <div class="form-group">
-            <label for="item1">Field of an Array [Item #@(Form2.SubArray.IndexOf(item))]</label>
+            <label for="item1">Field of an Array @itemNo</label>
             <InputText id="item1" class="form-control" @bind-Value="item.SubField"></InputText>
             <ValidationMessage For="() => item.SubField"></ValidationMessage>
         </div>
