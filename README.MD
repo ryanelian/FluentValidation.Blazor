@@ -23,7 +23,7 @@ This library is a direct replacement to [the default Blazor `<DataAnnotationVali
 <EditForm Model="Form">
 
 
-    <FluentValidation.FluentValidator></FluentValidation.FluentValidator>
+    <FluentValidator></FluentValidator>
 
 
     <div class="form-group">
@@ -61,12 +61,13 @@ public class FormModelValidator : AbstractValidator<FormModel>
 }
 ```
 
-The `<FluentValidation.FluentValidator>` component automatically detects the `Model` data type used by the parent `<EditForm>` then attempts to acquire the corresponding `FluentValidation.IValidator<T>` for that model data type.
+The `<FluentValidator>` component automatically detects the `Model` data type used by the parent `<EditForm>` then attempts to acquire the corresponding `FluentValidation.IValidator<T>` for that model data type.
 
 For this reason, [in addition to coding the usual `FluentValidation.AbstractValidator<T> Fluent Validation implementation`](https://fluentvalidation.net/start), **you are required to register the `FluentValidation.IValidator<T>` implementation in the `Startup.cs` Service Provider (Dependency Injection)**:
 
 ```cs
 services.AddTransient<IValidator<CreateAccountFormModel>, CreateAccountFormModelValidator>();
+// Alternatively, use FluentValidation.DependencyInjectionExtensions package (read further down below...)
 ```
 
 **This effectively allows you, dear programmer, to inject required services to your validation implementations for writing amazing custom validation methods!** :fire:

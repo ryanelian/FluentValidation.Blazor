@@ -25,8 +25,11 @@ Validator parameter may also be passed directly to the component to inline the A
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.0</Version>
+    <Version>2.0.0</Version>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReleaseNotes>Version 2.0.0 BREAKING CHANGES:
+- Changed component namespace from FluentValidation.FluentValidator to Microsoft.AspNetCore.Components.Forms.FluentValidator to solve namespace-related issues when used in projects with Accelist.* namespace!
+- Set ServiceScope property in component to private. (Accidentally made public!)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FluentValidation
+namespace Microsoft.AspNetCore.Components.Forms
 {
     /// <summary>
     /// Add Fluent Validator support to an EditContext.
