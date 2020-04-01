@@ -55,6 +55,24 @@
     </div>
 </EditForm>
 
+<h1>Submitting / Editing This Form Will Crash The App</h1>
+
+<h4>(Check console log or logs.log file)</h4>
+
+<EditForm Model="CrashForm">
+    <FluentValidator></FluentValidator>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="CrashForm.Name"></InputText>
+        <ValidationMessage For="() => CrashForm.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
 @using FluentValidation;
 @code {
     class FormModel1
@@ -79,4 +97,6 @@
         SubArray = new List<FormModel3> { new FormModel3 { }, new FormModel3 { } },
         NotAForm = new MustNotValidate()
     };
+
+    CrashFormModel CrashForm = new CrashFormModel();
 }

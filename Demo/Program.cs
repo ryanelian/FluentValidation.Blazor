@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Demo
 {
@@ -17,7 +18,26 @@ namespace Demo
         public static void Main(string[] args)
         {
             ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;
-            CreateHostBuilder(args).Build().Run();
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Warning()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter())
+                .WriteTo.File("logs.log")
+                .CreateLogger();
+
+            try
+            {
+                CreateHostBuilder(args).UseSerilog().Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
