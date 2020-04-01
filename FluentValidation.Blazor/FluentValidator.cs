@@ -1,7 +1,8 @@
-﻿using FluentValidation;
+﻿using Accelist.FluentValidation.Blazor;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -69,7 +70,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         private void SetFormValidator()
         {
             var formType = CurrentEditContext.Model.GetType();
-            this.Validator = GetTypedValidator(formType);
+            this.Validator = TryGetValidatorForObjectType(formType);
             if (this.Validator == null)
             {
                 throw new InvalidOperationException($"FluentValidation.IValidator<{formType.FullName}> is"
@@ -82,7 +83,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// </summary>
         /// <param name="modelType"></param>
         /// <returns></returns>
-        private IValidator GetTypedValidator(Type modelType)
+        private IValidator TryGetValidatorForObjectType(Type modelType)
         {
             var validatorType = typeof(IValidator<>);
             var formValidatorType = validatorType.MakeGenericType(modelType);
@@ -112,16 +113,16 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="messages"></param>
         private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
-            // ATTENTION: DO NOT USE Async Void + ValidateAsync here
+            // WARNING: DO NOT USE Async Void + ValidateAsync here
             // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
-            var validationResults = Validator.Validate(editContext.Model);
-
+            var validationResults = TryValidateModel(editContext);
             messages.Clear();
 
-            var modelGraphCache = new Dictionary<string, object>();
+            var graph = new ModelGraphCache(editContext.Model);
             foreach (var error in validationResults.Errors)
             {
-                var (propertyValue, propertyName) = EvalObjectProperty(editContext.Model, error.PropertyName, modelGraphCache);
+                var (propertyValue, propertyName) = graph.EvalObjectProperty(error.PropertyName);
+                // while it is impossible to have a validation error for a null child property, better be safe than sorry...
                 if (propertyValue != null)
                 {
                     var fieldID = new FieldIdentifier(propertyValue, propertyName);
@@ -133,75 +134,75 @@ namespace Microsoft.AspNetCore.Components.Forms
         }
 
         /// <summary>
-        /// Get object property value by string path separated by dot, supports array (IList) syntax.
+        /// Attempts to validate an entire form object model.
         /// </summary>
-        /// <param name="model"></param>
-        /// <param name="propertyPath"></param>
-        /// <param name="cache"></param>
+        /// <param name="editContext"></param>
         /// <returns></returns>
-        private (object propertyValue, string propertyName) EvalObjectProperty(object model, string propertyPath, Dictionary<string, object> cache)
+        private ValidationResult TryValidateModel(EditContext editContext)
         {
-            if (propertyPath.Contains(".") == false)
+            try
             {
-                return (model, propertyPath);
+                return Validator.Validate(editContext.Model);
+            }
+            catch (Exception ex)
+            {
+                var msg = $"An unhandled exception occurred when validating <EditForm> model type: '{editContext.Model.GetType()}'";
+                throw new UnhandledValidationException(msg, ex);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to validate a single field or property of a form model or child object model.
+        /// </summary>
+        /// <param name="validator"></param>
+        /// <param name="editContext"></param>
+        /// <param name="fieldIdentifier"></param>
+        /// <returns></returns>
+        private ValidationResult TryValidateField(IValidator validator, EditContext editContext, in FieldIdentifier fieldIdentifier)
+        {
+            var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
+            var vctx = new ValidationContext(fieldIdentifier.Model, new FluentValidation.Internal.PropertyChain(), vselector);
+
+            try
+            {
+                return validator.Validate(vctx);
+            }
+            catch (Exception ex)
+            {
+                var msg = $"An unhandled exception occurred when validating field name: '{fieldIdentifier.FieldName}'";
+
+                if (editContext.Model != fieldIdentifier.Model)
+                {
+                    msg += $" of a child object of type: {fieldIdentifier.Model.GetType()}";
+                }
+
+                msg += $" of <EditForm> model type: '{editContext.Model.GetType()}'";
+                throw new UnhandledValidationException(msg, ex);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the field or property validator of a form model or child object model.
+        /// </summary>
+        /// <param name="editContext"></param>
+        /// <param name="fieldIdentifier"></param>
+        /// <returns></returns>
+        private IValidator TryGetFieldValidator(EditContext editContext, in FieldIdentifier fieldIdentifier)
+        {
+            if (fieldIdentifier.Model == editContext.Model)
+            {
+                return Validator;
             }
 
-            // FluentValidation Error PropertyName can be something like "ObjectA.ObjectB.PropertyX"
-            // However, Blazor does NOT recognize nested FieldIdentifier.
-            // Instead, the FieldIdentifier is assigned to the object in question. (Model + Property Name)
-            // Therefore, we need to traverse the object graph to acquire them!
-            var modelObjectPath = "";
-            var objectParts = propertyPath.Split('.');
-            var fieldName = objectParts[objectParts.Length - 1];
-            for (var i = 0; i < objectParts.Length - 1; i++)
+            var modelType = fieldIdentifier.Model.GetType();
+            if (ChildValidators.ContainsKey(modelType))
             {
-                var propertyName = objectParts[i];
-                bool isArray = false;
-                int arrayIndex = 0;
-                if (propertyName.Contains("[") && propertyName.Contains("]"))
-                {
-                    // propertyName = "A[22]" --> ["A", "22"]
-                    var indexedPropertyName = propertyName.Split('[', ']');
-                    propertyName = indexedPropertyName[0];
-                    isArray = true;
-                    arrayIndex = int.Parse(indexedPropertyName[1]);
-                }
-
-                // Constructing model object path here allows capturing the same array objects without the index!
-                if (string.IsNullOrEmpty(modelObjectPath))
-                {
-                    modelObjectPath = propertyName;
-                }
-                else
-                {
-                    modelObjectPath += "." + propertyName;
-                }
-
-                // Locally cache objects found along the way to prevent slow multiple reflection method calls
-                // For Example: large array of 1000 elements will only use reflection on that array object once!
-                if (cache.ContainsKey(modelObjectPath))
-                {
-                    model = cache[modelObjectPath];
-                }
-                else
-                {
-                    model = model.GetType().GetProperty(propertyName)?.GetValue(model);
-                    cache[modelObjectPath] = model;
-                }
-
-                if (isArray && model is IList array)
-                {
-                    // System.Array implements IList https://docs.microsoft.com/en-us/dotnet/api/system.array?view=netcore-3.0
-                    model = array[arrayIndex];
-                }
-
-                if (model == null)
-                {
-                    break;
-                }
+                return ChildValidators[modelType];
             }
 
-            return (model, fieldName);
+            var validator = TryGetValidatorForObjectType(modelType);
+            ChildValidators[modelType] = validator;
+            return validator;
         }
 
         /// <summary>
@@ -212,30 +213,14 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="fieldIdentifier"></param>
         private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
         {
-            var fieldValidator = Validator;
-            if (fieldIdentifier.Model != editContext.Model)
+            var fieldValidator = TryGetFieldValidator(editContext, fieldIdentifier);
+            if (fieldValidator == null)
             {
-                var modelType = fieldIdentifier.Model.GetType();
-                if (ChildValidators.ContainsKey(modelType))
-                {
-                    fieldValidator = ChildValidators[modelType];
-                }
-                else
-                {
-                    fieldValidator = GetTypedValidator(modelType);
-                    ChildValidators[modelType] = fieldValidator;
-                }
-                if (fieldValidator == null)
-                {
-                    // Should not error / just fail silently for classes not supposed to be validated.
-                    return;
-                }
+                // Should not error / just fail silently for classes not supposed to be validated.
+                return;
             }
 
-            var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = new ValidationContext(fieldIdentifier.Model, new FluentValidation.Internal.PropertyChain(), vselector);
-            var validationResults = fieldValidator.Validate(vctx);
-
+            var validationResults = TryValidateField(fieldValidator, editContext, fieldIdentifier);
             messages.Clear(fieldIdentifier);
 
             foreach (var error in validationResults.Errors)
