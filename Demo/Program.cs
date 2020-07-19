@@ -17,7 +17,7 @@ namespace Demo
     {
         public static void Main(string[] args)
         {
-            ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;
+            ValidatorOptions.Global.CascadeMode = CascadeMode.StopOnFirstFailure;
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Warning()
