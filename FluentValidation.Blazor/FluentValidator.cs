@@ -91,23 +91,31 @@ namespace Microsoft.AspNetCore.Components.Forms
         }
 
         /// <summary>
-        /// Create an instance of a ValidationContext for the specified model.
+        /// Creates an instance of a ValidationContext for an object model.
         /// </summary>
         /// <param name="model"></param>
-        /// <param name="propertyChain"></param>
         /// <param name="validatorSelector"></param>
         /// <returns></returns>
-        private IValidationContext CreateValidationContext(object model, PropertyChain propertyChain = default, IValidatorSelector validatorSelector = default)
+        private IValidationContext CreateValidationContext(object model, IValidatorSelector validatorSelector = null)
         {
-            var contextType = typeof(ValidationContext<>);
-            var modelType = model.GetType();
-            var closedContextType = contextType.MakeGenericType(modelType);
+            // This method is required due to breaking changes in FluentValidation 9!
+            // https://docs.fluentvalidation.net/en/latest/upgrading-to-9.html#removal-of-non-generic-validate-overload
 
-            return (IValidationContext)Activator.CreateInstance(
-                closedContextType, 
-                model,
-                propertyChain ?? new PropertyChain(), 
-                validatorSelector ?? ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory());
+            var validationContextGeneric = typeof(ValidationContext<>);
+            var validationContextType = validationContextGeneric.MakeGenericType(model.GetType());
+
+            if (validatorSelector != null)
+            {
+                return (IValidationContext)Activator.CreateInstance(validationContextType, model);
+            }
+            else
+            {
+                return (IValidationContext)Activator.CreateInstance(validationContextType,
+                    model,
+                    new PropertyChain(),
+                    validatorSelector
+                );
+            }
         }
 
         /// <summary>
@@ -181,7 +189,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <returns></returns>
         private ValidationResult TryValidateField(IValidator validator, EditContext editContext, in FieldIdentifier fieldIdentifier)
         {
-            var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
+            var vselector = new MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
             var vctx = CreateValidationContext(fieldIdentifier.Model, validatorSelector: vselector);
 
             try
