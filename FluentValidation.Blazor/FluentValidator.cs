@@ -4,7 +4,7 @@ using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using FluentValidation.Internal;
 
 namespace Microsoft.AspNetCore.Components.Forms
 {
@@ -91,6 +91,26 @@ namespace Microsoft.AspNetCore.Components.Forms
         }
 
         /// <summary>
+        /// Create an instance of a ValidationContext for the specified model.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="propertyChain"></param>
+        /// <param name="validatorSelector"></param>
+        /// <returns></returns>
+        private IValidationContext CreateValidationContext(object model, PropertyChain propertyChain = default, IValidatorSelector validatorSelector = default)
+        {
+            var contextType = typeof(ValidationContext<>);
+            var modelType = model.GetType();
+            var closedContextType = contextType.MakeGenericType(modelType);
+
+            return (IValidationContext)Activator.CreateInstance(
+                closedContextType, 
+                model,
+                propertyChain ?? new PropertyChain(), 
+                validatorSelector ?? ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory());
+        }
+
+        /// <summary>
         /// Add form validation logic handlers.
         /// </summary>
         private void AddValidation()
@@ -142,7 +162,8 @@ namespace Microsoft.AspNetCore.Components.Forms
         {
             try
             {
-                return Validator.Validate(editContext.Model);
+                var validationContext = CreateValidationContext(editContext.Model);
+                return Validator.Validate(validationContext);
             }
             catch (Exception ex)
             {
@@ -161,7 +182,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         private ValidationResult TryValidateField(IValidator validator, EditContext editContext, in FieldIdentifier fieldIdentifier)
         {
             var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = new ValidationContext(fieldIdentifier.Model, new FluentValidation.Internal.PropertyChain(), vselector);
+            var vctx = CreateValidationContext(fieldIdentifier.Model, validatorSelector: vselector);
 
             try
             {
