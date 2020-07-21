@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Demo.Models
+namespace Demo.Forms.Models
 {
-    public class CrashFormModel
+    public class CrashForm
     {
         public string Name { set; get; }
     }
 
-    public class CrashFormModelValidator : AbstractValidator<CrashFormModel>
+    public class CrashFormModelValidator : AbstractValidator<CrashForm>
     {
         public CrashFormModelValidator()
         {

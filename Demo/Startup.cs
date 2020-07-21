@@ -9,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Demo.Data;
-using Demo.Services;
 using FluentValidation;
-using Demo.Models;
+using Demo.Forms.Services;
+using Demo.Forms.Models;
 
 namespace Demo
 {
@@ -34,7 +34,7 @@ namespace Demo
 
             services.AddTransient<EmailCheckerService>();
             // services.AddTransient<IValidator<FormModel2>, FormModel2Validator>();
-            services.AddValidatorsFromAssemblyContaining<Program>();
+            services.AddValidatorsFromAssemblyContaining<NestedForm>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

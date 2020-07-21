@@ -27,8 +27,8 @@
     </div>
     <div class="form-group">
         <label for="child">Field of a Nested Object</label>
-        <InputText id="child" class="form-control" @bind-Value="Form2.FormModel3.SubField"></InputText>
-        <ValidationMessage For="() => Form2.FormModel3.SubField"></ValidationMessage>
+        <InputText id="child" class="form-control" @bind-Value="Form2.Child.SubField"></InputText>
+        <ValidationMessage For="() => Form2.Child.SubField"></ValidationMessage>
     </div>
     @for (var i = 0; i < Form2.SubArray.Count; i++)
     {
@@ -73,30 +73,16 @@
     </div>
 </EditForm>
 
-@using FluentValidation;
 @code {
-    class FormModel1
-    {
-        public string Name { set; get; }
-    }
+    BasicForm Form1 = new BasicForm();
+    BasicFormValidator Form1Validator = new BasicFormValidator();
 
-    class FormModel1Validator : AbstractValidator<FormModel1>
+    NestedForm Form2 = new NestedForm
     {
-        public FormModel1Validator()
-        {
-            RuleFor(Q => Q.Name).NotEmpty().MinimumLength(2).MaximumLength(8);
-        }
-    }
-
-    FormModel1 Form1 = new FormModel1();
-    FormModel1Validator Form1Validator = new FormModel1Validator();
-
-    FormModel2 Form2 = new FormModel2
-    {
-        FormModel3 = new FormModel3(),
-        SubArray = new List<FormModel3> { new FormModel3 { }, new FormModel3 { } },
+        Child = new ChildForm(),
+        SubArray = new List<ChildForm> { new ChildForm { }, new ChildForm { } },
         NotAForm = new MustNotValidate()
     };
 
-    CrashFormModel CrashForm = new CrashFormModel();
+    CrashForm CrashForm = new CrashForm();
 }
