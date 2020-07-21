@@ -1,0 +1,88 @@
+﻿@page "/"
+
+<h1>Form 1: Inline Validation</h1>
+
+<EditForm Model="Form1">
+    <FluentValidator Validator="Form1Validator"></FluentValidator>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Form1.Name"></InputText>
+        <ValidationMessage For="() => Form1.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
+<h1>Form 2: Dependency Injection Validation</h1>
+
+<EditForm Model="Form2">
+    <FluentValidator></FluentValidator>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="Form2.Email"></InputText>
+        <ValidationMessage For="() => Form2.Email"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label for="child">Field of a Nested Object</label>
+        <InputText id="child" class="form-control" @bind-Value="Form2.Child.SubField"></InputText>
+        <ValidationMessage For="() => Form2.Child.SubField"></ValidationMessage>
+    </div>
+    @for (var i = 0; i < Form2.SubArray.Count; i++)
+    {
+        var item = Form2.SubArray[i];
+        var itemNo = $"[Item #{i}]";
+
+        <div class="form-group">
+            <label for="item1">Field of an Array @itemNo</label>
+            <InputText id="item1" class="form-control" @bind-Value="item.SubField"></InputText>
+            <ValidationMessage For="() => item.SubField"></ValidationMessage>
+        </div>
+    }
+    <div class="form-group">
+        <label for="novalidate">Should Not Validate</label>
+        <InputText id="novalidate" class="form-control" @bind-Value="Form2.NotAForm.ShouldNotValidate"></InputText>
+    </div>
+    <div class="form-group">
+        <ValidationSummary></ValidationSummary>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
+<h1>Submitting / Editing This Form Will Crash The App</h1>
+
+<h4>(Check console log or logs.log file)</h4>
+
+<EditForm Model="CrashForm">
+    <FluentValidator></FluentValidator>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="CrashForm.Name"></InputText>
+        <ValidationMessage For="() => CrashForm.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    BasicForm Form1 = new BasicForm();
+    BasicFormValidator Form1Validator = new BasicFormValidator();
+
+    NestedForm Form2 = new NestedForm
+    {
+        Child = new ChildForm(),
+        SubArray = new List<ChildForm> { new ChildForm { }, new ChildForm { } },
+        NotAForm = new MustNotValidate()
+    };
+
+    CrashForm CrashForm = new CrashForm();
+}
