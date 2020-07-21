@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using FluentValidation.Internal;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Components.Forms
 {
@@ -139,11 +140,11 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// </summary>
         /// <param name="editContext"></param>
         /// <param name="messages"></param>
-        private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
+        private async void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
-            // WARNING: DO NOT USE Async Void + ValidateAsync here
-            // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
-            var validationResults = TryValidateModel(editContext);
+            // <EditForm> should now be able to run async validations:
+            // https://github.com/dotnet/aspnetcore/issues/11914
+            var validationResults = await TryValidateModel(editContext);
             messages.Clear();
 
             var graph = new ModelGraphCache(editContext.Model);
@@ -166,12 +167,12 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// </summary>
         /// <param name="editContext"></param>
         /// <returns></returns>
-        private ValidationResult TryValidateModel(EditContext editContext)
+        private async Task<ValidationResult> TryValidateModel(EditContext editContext)
         {
             try
             {
                 var validationContext = CreateValidationContext(editContext.Model);
-                return Validator.Validate(validationContext);
+                return await Validator.ValidateAsync(validationContext);
             }
             catch (Exception ex)
             {
@@ -187,14 +188,13 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="editContext"></param>
         /// <param name="fieldIdentifier"></param>
         /// <returns></returns>
-        private ValidationResult TryValidateField(IValidator validator, EditContext editContext, in FieldIdentifier fieldIdentifier)
+        private async Task<ValidationResult> TryValidateField(IValidator validator, EditContext editContext, FieldIdentifier fieldIdentifier)
         {
-            var vselector = new MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = CreateValidationContext(fieldIdentifier.Model, validatorSelector: vselector);
-
             try
             {
-                return validator.Validate(vctx);
+                var vselector = new MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
+                var vctx = CreateValidationContext(fieldIdentifier.Model, validatorSelector: vselector);
+                return await validator.ValidateAsync(vctx);
             }
             catch (Exception ex)
             {
@@ -240,7 +240,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="editContext"></param>
         /// <param name="messages"></param>
         /// <param name="fieldIdentifier"></param>
-        private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
+        private async void ValidateField(EditContext editContext, ValidationMessageStore messages, FieldIdentifier fieldIdentifier)
         {
             var fieldValidator = TryGetFieldValidator(editContext, fieldIdentifier);
             if (fieldValidator == null)
@@ -249,7 +249,7 @@ namespace Microsoft.AspNetCore.Components.Forms
                 return;
             }
 
-            var validationResults = TryValidateField(fieldValidator, editContext, fieldIdentifier);
+            var validationResults = await TryValidateField(fieldValidator, editContext, fieldIdentifier);
             messages.Clear(fieldIdentifier);
 
             foreach (var error in validationResults.Errors)
