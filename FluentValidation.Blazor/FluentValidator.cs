@@ -105,7 +105,7 @@ namespace Microsoft.AspNetCore.Components.Forms
             var validationContextGeneric = typeof(ValidationContext<>);
             var validationContextType = validationContextGeneric.MakeGenericType(model.GetType());
 
-            if (validatorSelector != null)
+            if (validatorSelector == null)
             {
                 return (IValidationContext)Activator.CreateInstance(validationContextType, model);
             }
