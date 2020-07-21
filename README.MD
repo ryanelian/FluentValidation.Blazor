@@ -128,14 +128,6 @@ public class RootValidator : AbstractValidator<Root>
 
 > If for some reason Dependency Injection is not possible, the parameter `ChildValidators` (inlined `Dictionary<Type, IValidator>` defining validators used for each children model types) MUST be passed into the component due to technical reasons.
 
-## Asynchronous Warning
-
-Due to buggy UI when using `async void` on `EditContext.OnValidationRequested` and `EditContext.OnFieldChanged` event handler (i.e. CSS not updating, to be reported to ASP.NET Core issue repo), **the validator is run synchronously**.
-
-**This should not stop you from writing async validation methods because Fluent Validation will force run async methods synchronously.**
-
-*Just something to keep in mind when coding!*
-
 ## Repeated Remote Call Warning :warning:
 
 **By default, Fluent Validation does NOT short-circuit the validation chain on first error.**

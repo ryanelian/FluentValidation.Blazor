@@ -25,15 +25,13 @@ Validator parameter may also be passed directly to the component to inline the A
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.1.0</Version>
+    <Version>3.0.0</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>
-      Version 2.1.0:
-      - Added internal UnhandledValidationException for logging unhandled form validation exceptions.
-
-      Version 2.0.0 BREAKING CHANGES:
-      - Changed component namespace from FluentValidation.FluentValidator to Microsoft.AspNetCore.Components.Forms.FluentValidator to solve namespace-related issues when used in projects with Accelist.* namespace!
-      - Set ServiceScope property in component to private. (Accidentally made public!)</PackageReleaseNotes>
+Version 3.0.0 BREAKING CHANGES:
+- Package is now compatible with ASP.NET Core Blazor 3.1 LTS (Server-Side) and 3.2 (WebAssembly)
+- FluentValidation package is upgraded to version 9 due to popular demands. Make sure your project has FluentValidation version 9 also!
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,7 +39,7 @@ Validator parameter may also be passed directly to the component to inline the A
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="8.6.2" />
+    <PackageReference Include="FluentValidation" Version="9.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.0" />
   </ItemGroup>

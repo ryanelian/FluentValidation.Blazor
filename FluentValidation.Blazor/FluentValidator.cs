@@ -4,7 +4,8 @@ using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using FluentValidation.Internal;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Components.Forms
 {
@@ -91,6 +92,34 @@ namespace Microsoft.AspNetCore.Components.Forms
         }
 
         /// <summary>
+        /// Creates an instance of a ValidationContext for an object model.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="validatorSelector"></param>
+        /// <returns></returns>
+        private IValidationContext CreateValidationContext(object model, IValidatorSelector validatorSelector = null)
+        {
+            // This method is required due to breaking changes in FluentValidation 9!
+            // https://docs.fluentvalidation.net/en/latest/upgrading-to-9.html#removal-of-non-generic-validate-overload
+
+            var validationContextGeneric = typeof(ValidationContext<>);
+            var validationContextType = validationContextGeneric.MakeGenericType(model.GetType());
+
+            if (validatorSelector == null)
+            {
+                return (IValidationContext)Activator.CreateInstance(validationContextType, model);
+            }
+            else
+            {
+                return (IValidationContext)Activator.CreateInstance(validationContextType,
+                    model,
+                    new PropertyChain(),
+                    validatorSelector
+                );
+            }
+        }
+
+        /// <summary>
         /// Add form validation logic handlers.
         /// </summary>
         private void AddValidation()
@@ -111,11 +140,11 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// </summary>
         /// <param name="editContext"></param>
         /// <param name="messages"></param>
-        private void ValidateModel(EditContext editContext, ValidationMessageStore messages)
+        private async void ValidateModel(EditContext editContext, ValidationMessageStore messages)
         {
-            // WARNING: DO NOT USE Async Void + ValidateAsync here
-            // Explanation: Blazor UI will get VERY BUGGY for some reason if you do that. (Field CSS lagged behind validation)
-            var validationResults = TryValidateModel(editContext);
+            // <EditForm> should now be able to run async validations:
+            // https://github.com/dotnet/aspnetcore/issues/11914
+            var validationResults = await TryValidateModel(editContext);
             messages.Clear();
 
             var graph = new ModelGraphCache(editContext.Model);
@@ -138,11 +167,12 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// </summary>
         /// <param name="editContext"></param>
         /// <returns></returns>
-        private ValidationResult TryValidateModel(EditContext editContext)
+        private async Task<ValidationResult> TryValidateModel(EditContext editContext)
         {
             try
             {
-                return Validator.Validate(editContext.Model);
+                var validationContext = CreateValidationContext(editContext.Model);
+                return await Validator.ValidateAsync(validationContext);
             }
             catch (Exception ex)
             {
@@ -158,14 +188,13 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="editContext"></param>
         /// <param name="fieldIdentifier"></param>
         /// <returns></returns>
-        private ValidationResult TryValidateField(IValidator validator, EditContext editContext, in FieldIdentifier fieldIdentifier)
+        private async Task<ValidationResult> TryValidateField(IValidator validator, EditContext editContext, FieldIdentifier fieldIdentifier)
         {
-            var vselector = new FluentValidation.Internal.MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
-            var vctx = new ValidationContext(fieldIdentifier.Model, new FluentValidation.Internal.PropertyChain(), vselector);
-
             try
             {
-                return validator.Validate(vctx);
+                var vselector = new MemberNameValidatorSelector(new[] { fieldIdentifier.FieldName });
+                var vctx = CreateValidationContext(fieldIdentifier.Model, validatorSelector: vselector);
+                return await validator.ValidateAsync(vctx);
             }
             catch (Exception ex)
             {
@@ -211,7 +240,7 @@ namespace Microsoft.AspNetCore.Components.Forms
         /// <param name="editContext"></param>
         /// <param name="messages"></param>
         /// <param name="fieldIdentifier"></param>
-        private void ValidateField(EditContext editContext, ValidationMessageStore messages, in FieldIdentifier fieldIdentifier)
+        private async void ValidateField(EditContext editContext, ValidationMessageStore messages, FieldIdentifier fieldIdentifier)
         {
             var fieldValidator = TryGetFieldValidator(editContext, fieldIdentifier);
             if (fieldValidator == null)
@@ -220,7 +249,7 @@ namespace Microsoft.AspNetCore.Components.Forms
                 return;
             }
 
-            var validationResults = TryValidateField(fieldValidator, editContext, fieldIdentifier);
+            var validationResults = await TryValidateField(fieldValidator, editContext, fieldIdentifier);
             messages.Clear(fieldIdentifier);
 
             foreach (var error in validationResults.Errors)
