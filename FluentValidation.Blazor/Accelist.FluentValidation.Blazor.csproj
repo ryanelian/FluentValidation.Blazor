@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
+	<TargetFramework>net5.0</TargetFramework>
     <Authors>ryanelian</Authors>
     <Title>FluentValidation.Blazor</Title>
-    <Description>Fluent Validation-powered Blazor component for validating standard &lt;EditForm&gt; 🌀 ✅
+    <Description>
+Fluent Validation-powered Blazor component for validating standard &lt;EditForm&gt;
 
 https://github.com/ryanelian/FluentValidation.Blazor/blob/master/README.MD
 
@@ -25,13 +25,12 @@ Validator parameter may also be passed directly to the component to inline the A
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>
-Version 3.0.0 BREAKING CHANGES:
-- Package is now compatible with ASP.NET Core Blazor 3.1 LTS (Server-Side) and 3.2 (WebAssembly)
-- FluentValidation package is upgraded to version 9 due to popular demands. Make sure your project has FluentValidation version 9 also!
-    </PackageReleaseNotes>
+Version 4.0.0 BREAKING CHANGES:
+- Package now targets .NET 5 project. If working with .NET Core 3.1 projects, use the version 3.0.0 package!
+</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,9 +38,9 @@ Version 3.0.0 BREAKING CHANGES:
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.0" />
+    <PackageReference Include="FluentValidation" Version="9.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
