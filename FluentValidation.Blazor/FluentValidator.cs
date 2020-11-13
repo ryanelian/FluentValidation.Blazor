@@ -102,21 +102,19 @@ namespace Microsoft.AspNetCore.Components.Forms
             // This method is required due to breaking changes in FluentValidation 9!
             // https://docs.fluentvalidation.net/en/latest/upgrading-to-9.html#removal-of-non-generic-validate-overload
 
-            var validationContextGeneric = typeof(ValidationContext<>);
-            var validationContextType = validationContextGeneric.MakeGenericType(model.GetType());
-
             if (validatorSelector == null)
             {
-                return (IValidationContext)Activator.CreateInstance(validationContextType, model);
+                // No selector specified - use the default.
+                validatorSelector = ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();
             }
-            else
-            {
-                return (IValidationContext)Activator.CreateInstance(validationContextType,
-                    model,
-                    new PropertyChain(),
-                    validatorSelector
-                );
-            }
+
+            // Don't need to use reflection to construct the context. 
+            // If you create it as a ValidationContext<object> instead of a ValidationContext<T> then FluentValidation will perform the conversion internally, assuming the types are compatible. 
+            var context = new ValidationContext<object>(model, new PropertyChain(), validatorSelector);
+
+            // InjectValidator looks for a service provider inside the ValidationContext with this key. 
+            context.RootContextData["_FV_ServiceProvider"] = ServiceProvider;
+            return context;
         }
 
         /// <summary>

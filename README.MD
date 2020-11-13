@@ -109,6 +109,18 @@ public class FormModelValidator : AbstractValidator<FormModel>
 }
 ```
 
+## FluentValidation.DependencyInjectionExtensions
+
+```
+dotnet add package FluentValidation.DependencyInjectionExtensions
+```
+
+```cs
+services.AddValidatorsFromAssemblyContaining<Program>();
+```
+
+**Can be used to auto-populate all validators from current application / other project automatically!**
+
 ## Nested Objects & Arrays Validation
 
 FluentValidation offers `SetValidator` method for validating nested objects and arrays. Combined with Dependency Injection capability of this component library, a complex form can be validated easily:
@@ -139,24 +151,6 @@ To reduce the impact of repeated custom validation calls, use:
 - `.Cascade(CascadeMode.StopOnFirstFailure)` after `RuleFor()` chain,
 
 - Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
-
-## FluentValidation.DependencyInjectionExtensions
-
-```
-dotnet add package FluentValidation.DependencyInjectionExtensions
-```
-
-```cs
-services.AddValidatorsFromAssemblyContaining<Program>();
-```
-
-**Can be used to auto-populate all validators from current application / other project automatically!**
-
-However, [`InjectValidator`](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L76-L111) extension method cannot be used because: (quoting @JeremySkinner comment)
-
-> [Making use of InjectValidator or GetServiceProvider is only supported when using the automatic MVC integration.](https://github.com/JeremySkinner/FluentValidation/blob/24aaddb4b00e3563e8d03fd6edd06f487e207e8a/src/FluentValidation.DependencyInjectionExtensions/DependencyInjectionExtensions.cs#L64)
-
-That said, the built-in `SetValidator` method can still be used with an injected `IValidator<T>` object instead.
 
 ## Why Not Just Use `<DataAnnotationValidator>`?
 
