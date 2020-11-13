@@ -148,9 +148,9 @@ This may cause performance issues when a validation logic hits the database / re
 
 To reduce the impact of repeated custom validation calls, use:
 
-- `.Cascade(CascadeMode.StopOnFirstFailure)` after `RuleFor()` chain,
+- `.Cascade(CascadeMode.Stop)` after `RuleFor()` chain,
 
-- Or set `ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;` on `Program.cs` application entry point.
+- Or set `ValidatorOptions.CascadeMode = CascadeMode.Stop;` on `Program.cs` application entry point.
 
 ## Why Not Just Use `<DataAnnotationValidator>`?
 

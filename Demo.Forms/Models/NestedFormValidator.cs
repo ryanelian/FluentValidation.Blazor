@@ -12,7 +12,7 @@ namespace Demo.Forms.Models
         {
             this.EmailChecker = emailCheckerService;
 
-            RuleFor(Q => Q.Email).Cascade(CascadeMode.StopOnFirstFailure)
+            RuleFor(Q => Q.Email)
                 .NotEmpty().MinimumLength(4).MaximumLength(64).EmailAddress()
                 .MustAsync(EmailAvailableAsync).WithMessage(o => $"Email {o.Email} is not available.");
 
