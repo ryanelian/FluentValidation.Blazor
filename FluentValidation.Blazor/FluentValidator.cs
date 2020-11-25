@@ -72,6 +72,9 @@ namespace Microsoft.AspNetCore.Components.Forms
             this.AddValidation();
         }
 
+        /// <summary>
+        /// Clear all validation messages.
+        /// </summary>
         public void ClearMessages()
         {
             MessageStore.Clear();
