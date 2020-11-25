@@ -90,6 +90,7 @@ namespace Accelist.FluentValidation.Blazor
                 // System.Array implements IList https://docs.microsoft.com/en-us/dotnet/api/system.array?view=netcore-3.0
                 if (isArray && walker is IList array)
                 {
+                    modelObjectPath += $"{modelObjectPath}[{arrayIndex}]";
                     walker = array[arrayIndex];
                 }
 
