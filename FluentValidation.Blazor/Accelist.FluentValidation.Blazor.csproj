@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-	<TargetFramework>net5.0</TargetFramework>
-    <Authors>ryanelian</Authors>
-    <Title>FluentValidation.Blazor</Title>
-    <Description>
+	<PropertyGroup>
+		<TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+		<Authors>ryanelian</Authors>
+		<Title>FluentValidation.Blazor</Title>
+		<Description>
 Fluent Validation-powered Blazor component for validating standard &lt;EditForm&gt;
 
 https://github.com/ryanelian/FluentValidation.Blazor/blob/master/README.MD
@@ -18,29 +18,38 @@ For this reason, in addition to coding the usual FluentValidation.AbstractValida
 This effectively allows you, dear programmer, to inject required services to your validation implementations for writing amazing custom validation methods! 🔥
 
 Validator parameter may also be passed directly to the component to inline the AbstractValidator implementation instead of relying on .NET Core DI.
-</Description>
-    <Copyright>2019</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/ryanelian/FluentValidation.Blazor</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.0.0</Version>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes>
-Version 4.0.0 BREAKING CHANGES:
-- Package now targets .NET 5 project. If working with .NET Core 3.1 projects, use the version 3.0.0 package!
-</PackageReleaseNotes>
-  </PropertyGroup>
+		</Description>
+		<Copyright>2019</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/ryanelian/FluentValidation.Blazor</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
+		<RepositoryType>Git</RepositoryType>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>5.0.0</Version>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReleaseNotes>
+Version 5.0.0 BREAKING CHANGES:
+- Package sub-dependency Microsoft.AspNetCore.Components.Web is changed to Microsoft.AspNetCore.Components.Forms to allow using the library in Xamarin Blazor project!
+- Package is now compatible with both .NET 5.0 and .NET Core 3.1
+		</PackageReleaseNotes>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="img/icon.png" Pack="true" PackagePath="/" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="img/icon.png" Pack="true" PackagePath="/" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="9.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Forms" Version="5.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="9.3.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Forms" Version="3.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="3.1.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Forms" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+	</ItemGroup>
 
 </Project>
