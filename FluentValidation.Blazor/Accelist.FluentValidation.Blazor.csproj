@@ -32,6 +32,7 @@ Version 5.0.0 BREAKING CHANGES:
 - Package sub-dependency Microsoft.AspNetCore.Components.Web is changed to Microsoft.AspNetCore.Components.Forms to allow using the library in Xamarin Blazor project!
 - Package is now compatible with both .NET 5.0 and .NET Core 3.1
 		</PackageReleaseNotes>
+		<PackageId>ClearableFluentValidation.Blazor</PackageId>
 	</PropertyGroup>
 
 	<ItemGroup>

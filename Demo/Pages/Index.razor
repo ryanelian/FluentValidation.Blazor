@@ -19,7 +19,7 @@
 <h1>Form 2: Dependency Injection Validation</h1>
 
 <EditForm Model="Form2">
-    <FluentValidator></FluentValidator>
+    <FluentValidator @ref="Form2FluentValidator"></FluentValidator>
     <div class="form-group">
         <label for="email">Email</label>
         <InputText id="email" class="form-control" @bind-Value="Form2.Email"></InputText>
@@ -54,6 +54,9 @@
         </button>
     </div>
 </EditForm>
+<button class="btn btn-primary" @onclick="ClearForm2">
+    Clear Form
+</button>
 
 <h1>Submitting / Editing This Form Will Crash The App</h1>
 
@@ -85,4 +88,13 @@
     };
 
     CrashForm CrashForm = new CrashForm();
+
+    FluentValidator Form2FluentValidator;
+
+    void ClearForm2()
+    {
+        Form2.Clear();
+        Form2FluentValidator.ClearMessages();
+    }
+
 }

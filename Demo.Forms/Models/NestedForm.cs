@@ -13,6 +13,14 @@ namespace Demo.Forms.Models
         public List<ChildForm> SubArray { set; get; }
 
         public MustNotValidate NotAForm { set; get; }
+
+        public void Clear()
+        {
+            Email = String.Empty;
+            Child = new ChildForm();
+            SubArray = new List<ChildForm> { new ChildForm { }, new ChildForm { } };
+            NotAForm = new MustNotValidate();
+        }
     }
 
     public class ChildForm
