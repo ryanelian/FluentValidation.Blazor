@@ -42,10 +42,5 @@ Version 4.0.0 BREAKING CHANGES:
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Condition="'$(BUILD_SOURCESDIRECTORY)' == ''" Command="copy /Y &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;..\..\..\Dependencies\$(ProjectName).dll" />
-  </Target>
-
   
 </Project>
