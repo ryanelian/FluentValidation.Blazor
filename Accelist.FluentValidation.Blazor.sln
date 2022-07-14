@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29318.209
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Accelist.FluentValidation.Blazor", "FluentValidation.Blazor\Accelist.FluentValidation.Blazor.csproj", "{774DBB06-F9E7-495A-BE80-8BEE176B3194}"
 EndProject

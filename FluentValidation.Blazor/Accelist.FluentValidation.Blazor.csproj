@@ -25,12 +25,13 @@ Validator parameter may also be passed directly to the component to inline the A
     <RepositoryUrl>https://github.com/ryanelian/FluentValidation.Blazor</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>
 Version 4.0.0 BREAKING CHANGES:
 - Package now targets .NET 5 project. If working with .NET Core 3.1 projects, use the version 3.0.0 package!
 </PackageReleaseNotes>
+	  <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,9 +39,9 @@ Version 4.0.0 BREAKING CHANGES:
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="9.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
+    <PackageReference Include="FluentValidation" Version="11.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.17" />
   </ItemGroup>
 
 </Project>
